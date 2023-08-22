@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.1.0/dist/geosearch.css"/>
+    <script src="https://unpkg.com/leaflet-geosearch@3.1.0/dist/bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-search@2.4.0/dist/leaflet-search.src.js"> </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-search@2.4.0/dist/leaflet-search.src.css">
+    
+    <title>Μενού Χρήστη</title>
+    <style>
+        #map { 
+        margin-top: 1.5%;    
+        margin-left: 20%;
+        height: 600px;
+        width: 750px;}
+
+        img.huechange {filter: hue-rotate(205deg);}  
+        img.self_huechange {filter: hue-rotate(145deg);}
+        img.hide{visibility: hidden;}
+
+        /* .leaflet-popup-tip {
+        display: none;} */
+        
+        #prodInfo{
+            text-align: center;
+            padding: 3px 5px 3px;
+            border-radius: 3px;
+            background-color: rgba(52, 139, 232, 0.35); 
+        }
+
+        #info_table{
+            border-collapse: collapse;
+        }
+
+        #review_btn{
+            margin: 15px;
+            padding: 5px;
+            background-color: rgba(52, 139, 232, 0.35);
+            border: 1px ridge black; 
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #review_btn:hover{
+        cursor: pointer;
+        background-color: rgba(83, 163, 248, 0.35);
+        }
+
+        td{padding:  10px;}
+
+        tr{border-bottom: 2px ridge black;}
+
+    </style>
+</head>
+<body>
+    <div id="map"> </div>
+
+    <script>
+///create the basic map components       
+        var map = L.map('map');
+        
+        if(true){     //set a standard location point when geolocation doesn't work/is inaccurate
+            map.setView([38.234,21.7372], 14);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+            var marker = L.marker([38.234,21.7372],{title: "Τοποθεσία"}).bindPopup('Τοποθεσία χρήστη').addTo(map);
+            marker._icon.classList.add("self_huechange");
+        }
+        else{         //find user's location and display marker on it
+        map.locate({setView: true, watch: true})  
+        .on('locationfound', function(e){
+            var marker = L.marker([e.latitude, e.longitude]).bindPopup('You are here :)');
+            marker._icon.classList.add("self_huechange");
+            map.addLayer(marker);
+            
+        })
+        .on('locationerror', function(e){
+                console.log(e);
+                alert("Location access denied.");
+            });
+        }    
+
+        makemap();  // creates the map, initially showing only POIs with active offer
+
+///create the search-by-category dropdown on the map
+        var selector = L.control({
+        position: 'topleft'
+        });
+
+        //create the div for the selector
+        selector.onAdd = function(map) {
+        var div = L.DomUtil.create('div', 'mySelector');
+        div.innerHTML = '<select id="category_select"><option value="init">Κατηγορίες</option></select>';
+        return div;
+        };
+
+        selector.addTo(map);
+        var selectorLayer = L.layerGroup().addTo(map);
+
+        //load the categories and use them to fill the selector options
+        var xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var categories = JSON.parse(this.responseText);
+                    makeselector(categories);
+                    }
+                };
+            xhttp.open("GET", "usermap.php?functionToCall=getCategories", true);
+            xhttp.send();
+
+
+        function makeselector(categories){
+            for (let i = 0; i < categories.length; i++){
+                var optionElement = document.createElement("option");
+                optionElement.innerHTML = categories[i].name;
+                optionElement.value =  categories[i].name;
+                L.DomUtil.get("category_select").appendChild(optionElement);}
+            
+            
+            var category_select = L.DomUtil.get("category_select");
+            L.DomEvent.addListener(category_select, 'click', function(e) {
+            L.DomEvent.stopPropagation(e);
+            });
+            L.DomEvent.addListener(category_select, 'change', changeHandler);}
+
+        //handle selection of an option 
+        function changeHandler(e) {
+            var currMarkers = getMarkers(map);
+            if (e.target.value == "init") {
+                for (let i = 0; i < currMarkers.length; i++){
+                    if(currMarkers[i].properties){   //if marker "properties" has been set
+                        currMarkers[i]._icon.classList.remove("hide");
+                        currMarkers[i]._shadow.classList.remove("hide");}
+                    else{
+                        if(currMarkers[i].options.title != "Τοποθεσία"){
+                            currMarkers[i]._icon.classList.add("hide");
+                            currMarkers[i]._shadow.classList.add("hide");}
+                        }    
+                    }
+            } 
+            else {     
+                for (let i = 0; i < currMarkers.length; i++){
+                    if(currMarkers[i].properties)   //if marker "properties" has been set
+                        {for (let j = 0; j < currMarkers[i].properties.categories.length; j++){ 
+                            //if the chosen category is one of the shop's categories with an offer in them 
+                            if(currMarkers[i].properties.categories[j] == e.target.value){   
+                            currMarkers[i]._icon.classList.remove("hide");
+                            currMarkers[i]._shadow.classList.remove("hide");
+                            break
+                            }
+                            else{
+                            currMarkers[i]._icon.classList.add("hide");
+                            currMarkers[i]._shadow.classList.add("hide");
+                            }}
+                    }
+                    else{
+                        if(currMarkers[i].options.title != "Τοποθεσία")
+                            {currMarkers[i]._icon.classList.add("hide");
+                            currMarkers[i]._shadow.classList.add("hide");}
+                    }
+                }}} 
+
+
+
+///create the searchbar on the map         
+        var searchvalue = null;
+        var searchLayer = L.layerGroup().addTo(map);
+        var searchcontrol = new L.Control.Search({position: "topright",layer: searchLayer, marker: false, moveToLocation: 
+        function(latlng, title, map) 
+        {searchvalue = title; this._defaultMoveToLocation(latlng, title, map);}});
+        
+        searchcontrol.on('search:locationfound', function () { 
+            if(searchvalue){
+            var currMarkers = getMarkers(map); 
+            for (let i = 0; i < currMarkers.length; i++){
+                   if(currMarkers[i].options.title == searchvalue){
+                    currMarkers[i]._icon.classList.remove("hide");
+                    currMarkers[i]._shadow.classList.remove("hide");
+                   }
+                   else{
+                    if(currMarkers[i].options.title != "Τοποθεσία"){
+                        currMarkers[i]._icon.classList.add("hide");
+                        currMarkers[i]._shadow.classList.add("hide");}
+                   }
+            }}}).addTo(map);
+
+
+
+///create the initial map: load all POIs, show only POIs with active offers and give them different color        
+        function makemap(){
+        //get POIs with active offer    
+        var xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var pois_info = JSON.parse(this.responseText);
+                    makePOIsMarkers(pois_info,true);
+                    }
+                };
+            xhttp.open("GET", "usermap.php?functionToCall=pois_with_offers", true);
+            xhttp.send();
+
+        //get POIs with no active offer  
+        xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var pois_info = JSON.parse(this.responseText);
+                makePOIsMarkers(pois_info,false);
+                }
+            };
+        xhttp.open("GET", "usermap.php?functionToCall=pois_without_offers", true);
+        xhttp.send();    
+        }
+
+        //create the map markers and set their properties
+        function makePOIsMarkers(pois_info, offer){
+            for (let i = 0; i < pois_info.length; i++){
+
+                if(pois_info[i].name !== null) var marker = L.marker([pois_info[i].longitude,pois_info[i].latitude], //if POI name not null
+                    {title: pois_info[i][1]}).addTo(map);
+                else var marker = L.marker([pois_info[i].longitude,pois_info[i].latitude],
+                    {title: 'Άγνωστο'}).addTo(map); 
+                marker.id = pois_info[i].id;    
+                marker.addTo(searchLayer);
+                
+                if(offer){      //if this POI has an active offer display it with a different color and give it a "categories" property
+                    // marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo></div>", {
+                    //     maxWidth : "auto"});
+                    marker.on('click', popuphandler);
+                    marker._icon.classList.add("huechange");
+                    marker.properties = {};
+                    marker.properties.categories = Array();
+                    marker.properties.categories.push(pois_info[i][4]);
+                    var currMarkers = getMarkers(map);
+                    //if there's already an offer for the same shop, add the category to the existing marker and delete the new marker
+                    for (let j = 0; j < currMarkers.length-1; j++){
+                        if(currMarkers[j].options.title == marker.options.title && currMarkers[j].longitude == marker.longitude && currMarkers[j].latitude == marker.latitude){
+                            currMarkers[j].properties.categories.push(marker.properties.categories[0]);
+                            map.removeLayer(marker);
+                            break}}
+                }  
+                else{          //else hide the marker and its shadow
+                    marker.bindPopup("<h4><center>"+ pois_info[i][1] + "</h4>");  
+                    marker._icon.classList.add("hide");
+                    marker._shadow.classList.add("hide");}
+                }
+            }
+ 
+            //add all the markers in the map (hidden or not) to a list and then return it
+            function getMarkers(map) {
+            var markerList = [];
+            map.eachLayer(function(layer) {
+                if ((layer instanceof L.Marker)){
+                    markerList.push(layer);
+                };
+            });
+            return markerList;}    
+
+
+///create the content to be displayed on the pop-up of POIs with offers  
+        function popuphandler(e){
+            var marker = e.target;
+            xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "usermap.php?functionToCall=getOffers", true);
+            xhttp.setRequestHeader("POI.id", "string");
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {  
+                    info = this.responseText;                   
+                    if(getDistance(marker._latlng) <= 400){ //if distance of the POI and the user's location is <= 400 meters
+                        marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo>"+info+
+                            "</div><button id=review_btn>Αξιολόγηση προσφοράς</button>", 
+                            {maxWidth : "auto"}).openPopup();
+
+                        document.getElementById("review_btn").onclick = function () { //on button click send info and redirect
+                            sessionStorage.setItem("poi_id", marker.id);
+                            location.href = 'Review.html';
+                        };}
+                    else    //if distance of the POI and the user's location is > 400 meters
+                        marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo>"+info+"</div>", {
+                        maxWidth : "auto"}).openPopup(); 
+                    }
+                };
+            
+            xhttp.send(marker.id);  
+        }
+
+     
+        //compute distance between user's location and a specific spot on the map
+        function getDistance(to){
+            var currMarkers = getMarkers(map);
+            var userlocation;
+            for (let i = 0; i < currMarkers.length; i++)
+              if(currMarkers[i].options.title == "Τοποθεσία") userlocation = currMarkers[i]._latlng;
+            return userlocation.distanceTo(to);
+            }
+
+    </script>    
+    
+</body>
+</html>
