@@ -1,0 +1,84 @@
+{
+  "fetch_date": 1691491806,
+  "products": 
+  [
+    {
+      "id": "7",
+      "name": "Fix Hellas Mπύρα 330ml",
+      "category": "a8ac6be68b53443bbd93b229e2f9cd34",
+      "subcategory": "329bdd842f9f41688a0aa017b74ffde4"
+      },
+      {
+        "id": "8",
+        "name": "Fix Hellas Μπύρα 6X330ml",
+        "category": "a8ac6be68b53443bbd93b229e2f9cd34",
+        "subcategory": "329bdd842f9f41688a0aa017b74ffde4"
+      },
+      {
+        "id": "52",
+        "name": "Proderm Ενυδατική Κρέμα 150ml",
+        "category": "8016e637b54241f8ad242ed1699bf2da",
+        "subcategory": "ddb733df68324cfc8469c890b32e716d"
+      },
+      {
+        "id": "189",
+        "name": "Johnson Βρέφικη Πουδρα Σωματος 200γρ",
+        "category": "8016e637b54241f8ad242ed1699bf2da",
+        "subcategory": "ddb733df68324cfc8469c890b32e716d"
+      }
+  ],
+  "categories": [
+    {
+      "id": "8016e637b54241f8ad242ed1699bf2da",
+      "name": "Βρεφικά Είδη",
+      "subcategories": [
+        {
+          "name": "Απορρυπαντικά",
+          "uuid": "991276688c8c4a91b5524b1115122ec1"
+        },
+        {
+          "name": "Πάνες",
+          "uuid": "e0efaa1776714351a4c17a3a9d412602"
+        },
+        {
+          "name": "Γάλα",
+          "uuid": "fc71b59318b5410d8ed9da8b42904d77"
+        },
+        {
+          "name": "Περιποιήση σώματος",
+          "uuid": "ddb733df68324cfc8469c890b32e716d"
+        }
+      ]
+    },
+    {
+      "id": "a8ac6be68b53443bbd93b229e2f9cd34",
+      "name": "Ποτά - Αναψυκτικά",
+      "subcategories": [
+        {
+          "name": "Μπύρες",
+          "uuid": "329bdd842f9f41688a0aa017b74ffde4"
+        },
+        {
+          "name": "Εμφιαλωμένα νερά",
+          "uuid": "bc4d21162fbd4663b0e60aa9bd65115e"
+        },
+        {
+          "name": "Κρασιά",
+          "uuid": "3d01f4ce48ad422b90b50c62b1f8e7f2"
+        },
+        {
+          "name": "Ποτά",
+          "uuid": "08f280dee57c4b679be0102a8ba1343b"
+        },
+        {
+          "name": "Χυμοί",
+          "uuid": "4f1993ca5bd244329abf1d59746315b8"
+        },
+        {
+          "name": "Αναψυκτικά - Ενεργειακά Ποτά",
+          "uuid": "3010aca5cbdc401e8dfe1d39320a8d1a"
+        }
+      ]
+    }]
+}    
+ 
