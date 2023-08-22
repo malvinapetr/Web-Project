@@ -1,7 +1,7 @@
 # Web-Project
 Making a web application with data from e-katanalotis
 
-!Notes:
+**Notes**:
 
 * POIs.geojson is required for the User Main Menu page, to get POIs data/coordinates and then load them onto the map. It's used for loading/updating the POIs in the
 database when the respective button is clicked in Admin Main Menu. The data is then taken from the database to create the markers on the map.
