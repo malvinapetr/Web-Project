@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <title>Μενού Διαχειριστή</title>
+
+    <style>
+        #updProd, #delProd, #leaderboard_btn, #updPOIs,
+        #delPOIs{
+            margin-top: 10px;
+            margin-right: 20px;
+            padding: 12px 22px 12px 22px;
+            border-width: 1px;
+            border:none;
+            border-radius: 7px;
+            background-color: darkblue;
+            color: rgb(178, 242, 242);
+
+        }
+
+        #updProd{
+            margin-left: 10px;
+        }
+
+        #updProd:hover, #delProd:hover, #leaderboard_btn:hover,
+        #updPOIs:hover, #delPOIs:hover{
+            cursor: pointer;
+            opacity: 0.85;
+        }
+
+        #previous, #next{
+            visibility:hidden;
+            padding: 7px;
+            padding-left: 3px;
+            padding-right: 3px;
+            margin: 5px;
+            margin-top: 10px;
+        }
+
+        #previous{
+            margin-left:45%;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+    </style>  
+
+  
+</head>
+<body>
+    <button id="updProd" onclick="insertupdatedata()">Ανέβασμα προϊόντων</button>
+    <button id="delProd" onclick="deletedata()">Διαγραφή προϊόντων</button>
+    <button id="leaderboard_btn" onclick="showleader()">Προβολή Leaderboard</button>
+    <button id="updPOIs" onclick="insertupdatepois()">Ανέβασμα POIs</button> 
+    <button id="delPOIs" onclick="deletepois()">Διαγραφή POIs</button> 
+    <div id="leaderboard"></div>
+        <button id="previous" onclick="select_prev()">Πίσω</button>
+        <button id="next" onclick="select_next()">Εμπρός</button>
+    
+    
+    <script>
+        
+        function deletedata() {
+            if(confirm("Θέλετε σίγουρα να διαγράψετε όλα τα δεδομένα;")){  
+                var xhttp = new XMLHttpRequest();
+                xhttp.onload = function() {
+                        if (this.readyState == 4 && this.status == 200) 
+                            alert("Διαγράφηκε!");
+                        };
+                xhttp.open("GET", "insert_delete_prodData.php?functionToCall=delete", true);
+                xhttp.send();}
+        }
+         
+        function insertupdatedata() {
+          var xhttp = new XMLHttpRequest();
+          xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) 
+                    alert("Ενημερώθηκε!");
+                };
+          xhttp.open("GET", "insert_delete_prodData.php?functionToCall=insert_update", true);
+          xhttp.send();
+        }
+
+        function showleader() {
+            if(leaderboard_btn.innerHTML == "Προβολή Leaderboard"){  // case = show leaderboard
+                leaderboard_btn.innerHTML = "Απόκρυψη Leaderboard"
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("leaderboard").innerHTML = this.responseText;
+                    document.getElementById("previous").style.visibility = "visible";
+                    document.getElementById("next").style.visibility = "visible";
+                    }
+                };
+                xmlhttp.open("GET","Leaderboard.php?functionToCall=sessiondestroy",true);  
+                xmlhttp.send();
+            }
+            else {                                                // case = hide leaderboard
+                document.getElementById("previous").style.visibility = "hidden";
+                document.getElementById("next").style.visibility = "hidden";
+                leaderboard_btn.innerHTML = "Προβολή Leaderboard"
+                document.getElementById("leaderboard").innerHTML = " ";
+            }}
+    
+        
+        function select_next() {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("leaderboard").innerHTML = " ";
+                document.getElementById("leaderboard").innerHTML = this.responseText;
+                }
+            };
+            xmlhttp.open("GET","Leaderboard.php?functionToCall=selectnext",true);
+            xmlhttp.send();
+        }
+
+
+        function select_prev() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("leaderboard").innerHTML = " ";
+                    document.getElementById("leaderboard").innerHTML = this.responseText;
+                    console.log(this.responseText);
+                    }
+                };
+            xhttp.open("GET", "Leaderboard.php?functionToCall=selectprev", true);
+            xhttp.send();
+            }
+
+
+        function deletepois() {
+        if(confirm("Θέλετε σίγουρα να διαγράψετε όλα τα δεδομένα;")){
+            var xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                    if (this.readyState == 4 && this.status == 200) 
+                        alert("Διαγράφηκε!");
+                    };
+            xhttp.open("GET", "insert_delete_poiData.php?functionToCall=delete", true);
+            xhttp.send();}   
+        }    
+
+
+        function insertupdatepois() {
+          var xhttp = new XMLHttpRequest();
+          xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) 
+                    alert("Ενημερώθηκε!");
+                };
+          xhttp.open("GET", "insert_delete_poiData.php?functionToCall=insert_update", true);
+          xhttp.send();
+        }
+    </script>
+
+</body>
+</html>
