@@ -27,13 +27,22 @@
         .more_btn{
         font-size: 70%;}
 
-        #thumbup:active, #thumbdown:focus{
-            background-color: rgb(101, 8, 8)a(0, 0, 0, 0.4);
-        }
-
-        .more_btn:hover,.thumbup:hover, .thumbdown:hover, #stockupd:hover{
+        .more_btn:hover,.thumbup .fa.fa-thumbs-up:hover,.thumbdown .fa.fa-thumbs-down:hover, .fa.fa-paste:hover{
             cursor: pointer;
             color: rgba(0, 0, 0, 0.4);
+        }
+
+        .clickedthumbup{color:green;}
+        .clickedthumbdown{color:red;}
+
+        .clickedthumbdown:hover{
+            cursor: pointer;
+            color: rgba(255, 10, 10, 0.4);
+        }
+
+        .clickedthumbup:hover{
+            cursor: pointer;
+            color: rgba(6, 113, 49, 0.4);
         }
         
         .nostockthumbup, .nostockthumbdown{
@@ -54,9 +63,11 @@
     <div id="offers"></div>
 
     <script>
+        //if username session is not set, aka if user didn't log in or session expired, go back to login page
+        var isloggedin = "<?php if(!isset($_SESSION['username'])) echo 1; else echo 0;?>";
+        if(!isloggedin) window.location.replace("Login.html"); 
+
         var poi_id = sessionStorage.getItem("poi_id"); //get id of selected POI
-        let likes_click = Array();
-        let dislikes_click = Array();
         
         xhttp = new XMLHttpRequest();
             xhttp.open("POST", "Review.php?functionToCall=getPoiOffers", true);
@@ -66,45 +77,18 @@
                     document.getElementById("offers").innerHTML = this.responseText;
 
                     var elements = document.getElementsByClassName("more_btn");
-                    var dlelements = document.getElementsByClassName("thumbdown");
-                    var lelements = document.getElementsByClassName("thumbup");
-                    
+            
                     for (var i = 0; i < elements.length; i++) {
-                        elements[i].addEventListener('click', getmoreinfo, false);
-                        likes_click.push(0);
-                        dislikes_click.push(0);
-                    }   
-
-                    for (var i = 0; i < dlelements.length; i++) {
-                    dlelements[i].addEventListener('click',dislikehandler);
-                    lelements[i].addEventListener('click',likehandler);}
+                        elements[i].addEventListener('click', getmoreinfo, false);}   
                 }
                 };
         xhttp.send(poi_id);  
 
 ///if the 'more' or 'less' buttons are clicked, show or hide more info respectively
         var getmoreinfo = function(e) {
-            // var flag = true;
-
-            //if 'more' has been clicked for another offer, close the other offer
-            // for(let i=1; i < document.getElementById("offers_table").rows.length; i++){  
-            //     if(i==1) console.log(document.getElementById("offers_table").rows.length);
-            //     console.log(document.getElementById("offers_table").rows[i].cells[8].innerHTML);
-            //     let icon = document.getElementById("offers_table").rows[i].cells[8].innerHTML;
-            //     console.log(icon);
-            //     if(icon.textContent == 9650) {
-            //         document.getElementById("offers_table").rows[i].cells[8].innerHTML = '&#x25BC';
-            //         document.getElementById("offers_table").deleteRow(row.rowIndex+2);
-            //         document.getElementById("offers_table").deleteRow(row.rowIndex+1);
-            //         break
-            //     }
-
-            // }
-
+        
             var row = e.target.parentElement; //get parent element of the clicked element, aka the selected row
             if(e.target.textContent.charCodeAt(0) == 9660){ //decimal value of the hex 'down-triangle' html entity
-            //if(moreless.innerHTML =="Περισσότερα"){
-                //moreless.innerHTML = "Λιγότερα";
                 e.target.innerHTML = '&#x25B2';                
 
                 xhttp = new XMLHttpRequest();
@@ -119,60 +103,131 @@
                         new_row_header.insertCell(2).innerHTML ="<b>Συνολικό σκορ";
                         new_row_header.insertCell(3).innerHTML ="<b>Ενημέρωση αποθέματος";
                         new_row_cont.innerHTML = this.responseText;
-
-                        // dlelements = document.getElementsByClassName("thumbdown");
-                        // lelements = document.getElementsByClassName("thumbup");
-
-                        // for (var i = 0; i < dlelements.length; i++) {
-                        //     dlelements[i].addEventListener('click',dislikehandler);
-                        //     lelements[i].addEventListener('click',likehandler);
-                        // }
-
                         
+                        dlelements = document.querySelectorAll('.thumbdown .fa.fa-thumbs-down');
+                        lelements = document.querySelectorAll('.thumbup .fa.fa-thumbs-up');
+                        updelements = document.querySelectorAll('.fa.fa-paste');
+                       
+
+                        for (var i = 0; i < dlelements.length; i++) {
+                            dlelements[i].onclick = dislikehandler;
+                            lelements[i].onclick = likehandler;
+                        }   
+
+                        for (var i = 0; i < updelements.length; i++) {
+                            updelements[i].onclick = updstockhandler;} 
+                            
                     }
                     };
                 xhttp.send(row.firstChild.innerHTML);} //send the first child of the row, aka the offer id
             else {
-                //moreless.innerHTML = "Περισσότερα";
                 e.target.innerHTML = '&#x25BC';
                 document.getElementById("offers_table").deleteRow(row.rowIndex+2);
                 document.getElementById("offers_table").deleteRow(row.rowIndex+1);
             }
         };
 
+
+
         //handle pressing the dislike button
         function dislikehandler(e){
-            var row = e.target.parentElement; //get parent element of the clicked element, aka the selected row
-            console.log(row.rowIndex);
+            var row = e.target.closest("tr"); //get closest ancestor <tr> element of the clicked element, aka the selected row
+            offer_id = document.getElementById("offers_table").rows[row.rowIndex-2].cells[0].innerHTML; //get the respective offer id
 
+            xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "Review.php?functionToCall=checkDislikeStatus", true);
+                xhttp.setRequestHeader("dislike_info", "string");
+                xhttp.onload = function(){
+                    flag = this.responseText;
+                    updatedislikes(e,row,offer_id,flag);
+                }
+                xhttp.send(offer_id);  
         }
+
+
+        function updatedislikes(e,row,offer_id,flag){
+            dislikescnt = document.getElementById("offers_table").rows[row.rowIndex-2].cells[3].innerHTML;
+            var typeclick;
+            if(flag==0)
+            //if(dislikes_click[offer_id-1] % 2 == 0)  //if even number of dislike clicks
+                {dislikescnt++;
+                e.target.classList.add("clickedthumbdown");
+                typeclick = "Προσθήκη dislike";
+                }
+            else    
+                {dislikescnt--;
+                e.target.classList.remove("clickedthumbdown");
+                typeclick = "Αφαίρεση dislike";
+                }
+
+            
+            var data = {offerid: offer_id, dislikescount:dislikescnt, typeclick: typeclick};
+            xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "Review.php?functionToCall=updateOfferDislikes", true);
+                xhttp.setRequestHeader("prod_info", "string");
+                xhttp.onload = function(){
+                    document.getElementById("offers_table").rows[row.rowIndex-2].cells[3].innerHTML = this.responseText;
+                }
+                xhttp.send(JSON.stringify(data));
+        }
+
 
         //handle pressing the like button
         function likehandler(e){
-            var row = e.target.parentElement; //get parent element of the clicked element, aka the selected row
-            //target_row = row.rowIndex - 2;
-            //console.log(target_row);
-            console.log(row);
-            console.log(row.rowIndex);
-            offer_id = document.getElementById("offers_table").rows[row.rowIndex].cells[0].innerHTML; //get the respective offer id
-            //console.log(offer_id);
-            console.log(offer_id);
-            likescnt = document.getElementById("offers_table").rows[row.rowIndex].cells[2].innerHTML;
-            console.log(likes_click[0]);
-            if(likes_click[row.rowIndex-1] % 2 == 0)  //if even number of like clicks
+            var row = e.target.closest("tr"); //get closest ancestor <tr> element of the clicked element, aka the selected row
+            offer_id = document.getElementById("offers_table").rows[row.rowIndex-2].cells[0].innerHTML; //get the respective offer id
+           
+            xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "Review.php?functionToCall=checkLikeStatus", true);
+                xhttp.setRequestHeader("like_info", "string");
+                xhttp.onload = function(){
+                    flag = this.responseText;
+                    updatelikes(e,row,offer_id,flag);
+                }
+                xhttp.send(offer_id);  
+        }
+
+
+        function updatelikes(e,row,offer_id,flag){
+            likescnt = document.getElementById("offers_table").rows[row.rowIndex-2].cells[2].innerHTML;
+            var typeclick;
+            console.log(flag);
+            if(flag == 0)
+            //if(likes_click[offer_id-1] % 2 == 0)  //if even number of like clicks
                 {likescnt++;
-                 document.getElementById("offers_table").rows[row.rowIndex].cells[2].innerHTML = likescnt;
+                e.target.classList.add("clickedthumbup");
+                typeclick = 'Προσθήκη like';
                 }
             else    
                 {likescnt--;
-                document.getElementById("offers_table").rows[row.rowIndex].cells[2].innerHTML = likescnt;
+                e.target.classList.remove("clickedthumbup");
+                typeclick = 'Αφαίρεση like';
                 }
+            
+            var data = {offerid: offer_id, likescount:likescnt, typeclick: typeclick};
+            xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "Review.php?functionToCall=updateOfferLikes", true);
+                xhttp.setRequestHeader("prod_info", "string");
+                xhttp.onload = function(){
+                    document.getElementById("offers_table").rows[row.rowIndex-2].cells[2].innerHTML = this.responseText;
+                }
+                xhttp.send(JSON.stringify(data));  
+        }
 
-            likes_click[row.rowIndex-1]++;
-            //var sel_row = row.firstChild.innerHTML; //get the first child of the above row, aka the offer id
-            //alert(likes_click);
-            //console.log(sel_row);
 
+
+        //handle pressing the update stock button
+        function updstockhandler(e){
+            var row = e.target.closest("tr"); //get closest ancestor <tr> element of the clicked element, aka the selected row
+            offer_id = document.getElementById("offers_table").rows[row.rowIndex-2].cells[0].innerHTML; //get the respective offer id
+
+            xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "Review.php?functionToCall=updateStock", true);
+                xhttp.setRequestHeader("stock_info", "string");
+                xhttp.onload = function(){
+                    document.getElementById("offers_table").rows[row.rowIndex-2].cells[7].innerHTML = this.responseText;
+                }
+                xhttp.send(offer_id);  
         }
 
         
