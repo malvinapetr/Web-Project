@@ -1,5 +1,11 @@
 <?php 
+session_start();
+if (isset($_GET['functionToCall']) && function_exists($_GET['functionToCall'])) {
+  call_user_func($_GET['functionToCall']);
+}
 
+function checkLogin()
+{
 echo "<body style=background-color:darkblue;>";
 if(isset($_POST["login"])) $con_type = "login";   // for log-in
 else if(isset($_POST["signup"])) $con_type = "sign up";  //for sign-up
@@ -43,6 +49,7 @@ if($check){          //if password has correct format then start accessing the d
             echo "<script>alert('Λάθος username ή κωδικός!')</script>";
           }
           else{
+            $_SESSION['username'] = $username;
             if($fetched["type"] == "user") header("Refresh:0; url=UserMain.html");
             else header("Refresh:0; url=AdminMain.html");   
             echo "<script>alert('Επιτυχημένη σύνδεση!')</script>";
@@ -61,6 +68,7 @@ if($check){          //if password has correct format then start accessing the d
             mysqli_stmt_bind_param($stmt,"sssiiiis",$username,$password,$user_type,$zero,$zero,$zero,$zero,$date);
             mysqli_stmt_execute($stmt);
 
+            $_SESSION['usename'] = $username;
             header("Refresh:0; url=UserMain.html");    
             echo "<script>alert('Επιτυχημένη εγγραφή!')</script>";
         }
@@ -77,7 +85,7 @@ if($check){          //if password has correct format then start accessing the d
   finally{
     mysqli_close($conn);
   }  
-}
+}}
 
 //check password format
 function checkPassword($password){
@@ -88,6 +96,13 @@ function checkPassword($password){
         return 0;
     }
 return 1;    
+}
+
+
+//getter function used for getting the user's username in .js files
+function getUsername(){
+  if(isset($_SESSION['username'])) echo $_SESSION['username'];
+  else echo '';
 }
 
 
