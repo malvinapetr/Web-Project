@@ -15,6 +15,10 @@
     
     <title>Μενού Χρήστη</title>
     <style>
+        option[default] {
+        display: none;
+        }
+
         #map { 
         margin-top: 1.5%;    
         margin-left: 20%;
@@ -25,10 +29,18 @@
         img.self_huechange {filter: hue-rotate(145deg);}
         img.hide{visibility: hidden;}
 
-        /* .leaflet-popup-tip {
-        display: none;} */
+        .leaflet-popup-tip {
+        display: none;}
+
+        #return_btn{
+            margin-bottom: 5px;
+            background-color: rgba(65, 148, 243, 0.35);
+            font-size: 12px;
+            border-width: 1px;
+            border-radius: 3px;
+        }
         
-        #prodInfo{
+        #prodInfo, #dropCat{
             text-align: center;
             padding: 3px 5px 3px;
             border-radius: 3px;
@@ -39,8 +51,56 @@
             border-collapse: collapse;
         }
 
-        #review_btn{
-            margin: 15px;
+        #input_field{
+            margin-top: 10px;
+            margin-left: 40%;
+            font-size: 12px;
+            border-width: 1px;
+            width: 45px;
+        }
+
+        #search_field{
+            position: relative;
+            width: 95%;
+            font-size: 12px;
+            border-width: 1px;
+            margin-top: 3px;
+            margin-bottom: 3px;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 75%;
+            left: 0;
+            right: 0;
+            }
+
+        .autocomplete-active {
+        background-color: DodgerBlue !important;
+        color: #ffffff;
+        }    
+
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+            }
+
+        .autocomplete-items div:hover {background-color: #e9e9e9;}
+
+        #dropdowncategories{margin-bottom: 3px;}
+
+        #input_field::placeholder, #search_field::placeholder{
+            font-style:italic;
+            opacity: 0.8;
+        }
+
+        #review_btn, #addreview_btn,#nooffer_addreview_btn{
             padding: 5px;
             background-color: rgba(52, 139, 232, 0.35);
             border: 1px ridge black; 
@@ -48,7 +108,15 @@
             transition: background-color 0.3s;
         }
 
-        #review_btn:hover{
+        #review_btn, #addreview_btn{
+            margin: 15px;
+            margin-left: 40px;
+        }
+
+        #addreview_btn{margin-left: 90px;}
+
+        #review_btn:hover, #addreview_btn:hover, #nooffer_addreview_btn:hover, 
+        #return_btn:hover{
         cursor: pointer;
         background-color: rgba(83, 163, 248, 0.35);
         }
@@ -63,6 +131,19 @@
     <div id="map"> </div>
 
     <script>
+
+///if username not set or session expired, go back to login page        
+        var username = null; //get current user's username
+        xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                username = this.responseText;
+                if(username == '') window.location.replace("Login.html");
+                }
+            };
+        xhttp.open("GET", "LoginForm.php?functionToCall=getUsername", true);
+        xhttp.send();  
+        
 ///create the basic map components       
         var map = L.map('map');
         
@@ -232,25 +313,27 @@
                 marker.addTo(searchLayer);
                 
                 if(offer){      //if this POI has an active offer display it with a different color and give it a "categories" property
-                    // marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo></div>", {
-                    //     maxWidth : "auto"});
                     marker.on('click', popuphandler);
                     marker._icon.classList.add("huechange");
                     marker.properties = {};
                     marker.properties.categories = Array();
                     marker.properties.categories.push(pois_info[i][4]);
                     var currMarkers = getMarkers(map);
+
                     //if there's already an offer for the same shop, add the category to the existing marker and delete the new marker
                     for (let j = 0; j < currMarkers.length-1; j++){
                         if(currMarkers[j].options.title == marker.options.title && currMarkers[j].longitude == marker.longitude && currMarkers[j].latitude == marker.latitude){
+                            if(currMarkers[j].properties){
                             currMarkers[j].properties.categories.push(marker.properties.categories[0]);
                             map.removeLayer(marker);
-                            break}}
+                            break}
+                        }}
                 }  
-                else{          //else hide the marker and its shadow
-                    marker.bindPopup("<h4><center>"+ pois_info[i][1] + "</h4>");  
+                else{          //else hide the marker and its shadow and bind the appropriate pop-up
                     marker._icon.classList.add("hide");
-                    marker._shadow.classList.add("hide");}
+                    marker._shadow.classList.add("hide");
+                    if(getDistance(marker._latlng) <= 400) marker.on('click', noofferspopuphandler);
+                    else marker.bindPopup("<h4><center>"+ pois_info[i][1] + "</h4>");  }
                 }
             }
  
@@ -276,13 +359,18 @@
                     info = this.responseText;                   
                     if(getDistance(marker._latlng) <= 400){ //if distance of the POI and the user's location is <= 400 meters
                         marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo>"+info+
-                            "</div><button id=review_btn>Αξιολόγηση προσφοράς</button>", 
+                            "</div><button id=review_btn>Αξιολόγηση προσφοράς</button><button id=addreview_btn>Προσθήκη προσφοράς</button>", 
                             {maxWidth : "auto"}).openPopup();
 
                         document.getElementById("review_btn").onclick = function () { //on button click send info and redirect
                             sessionStorage.setItem("poi_id", marker.id);
                             location.href = 'Review.html';
-                        };}
+                        };
+
+                      document.getElementById("addreview_btn").onclick = function () { //on button click send info and redirect
+                      marker.closePopup();
+                      dropdowncategories(marker);};
+                    }
                     else    //if distance of the POI and the user's location is > 400 meters
                         marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo>"+info+"</div>", {
                         maxWidth : "auto"}).openPopup(); 
@@ -292,7 +380,16 @@
             xhttp.send(marker.id);  
         }
 
+
+        function noofferspopuphandler(e){
+            var marker = e.target;
+            marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><button id=nooffer_addreview_btn><center>Προσθήκη προσφοράς</button>").openPopup();;
+            document.getElementById("nooffer_addreview_btn").onclick = function () { //on button click send info and redirect
+            marker.closePopup();
+            dropdowncategories(marker);};
+        }
      
+
         //compute distance between user's location and a specific spot on the map
         function getDistance(to){
             var currMarkers = getMarkers(map);
@@ -301,6 +398,313 @@
               if(currMarkers[i].options.title == "Τοποθεσία") userlocation = currMarkers[i]._latlng;
             return userlocation.distanceTo(to);
             }
+
+
+///make the search bar and the the depth-3 dropwdown list that appear when submitting an offer
+        var submit_offer_poi = null;
+        var flag = null;
+        var marker = null; 
+        var category = null;
+        var subcategory = null;
+        var subcategories = null;
+        var products = null;
+        var prodsautocomplete = Array();
+    
+        function dropdowncategories(marker){
+        flag=0;
+        prodsautocomplete = Array();
+        submit_offer_poi = marker; 
+        
+        var searchpopupContent = `
+            <input id=search_field type="text" placeholder="Αναζήτηση προϊόντων">
+            </input>`;
+
+        var selectpopupContent = `
+            <select id=dropdowncategories>
+                <option value="" default selected>Κατηγορίες</option>
+            </select>`;
+
+        marker.bindPopup("<h4><center>"+ marker.options.title + 
+            "</h4><button id=return_btn>&#x2190</button><div id=dropCat>"+searchpopupContent+selectpopupContent+
+                "</div><div id=price_field></div>",{maxWidth : "auto"}).openPopup(); 
+            
+             
+    ///make the search bar 
+  
+        //make the product name array that will be used for the autocomplete
+        var xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var prodnames = JSON.parse(this.responseText);
+                    for (let i = 0; i < prodnames.length; i++){
+                        prodsautocomplete.push(prodnames[i][0])}
+                    autocomplete(document.getElementById("search_field"),prodsautocomplete);   
+                    }
+                };
+            xhttp.open("GET", "usermap.php?functionToCall=getAllProducts", true);
+            xhttp.send();
+
+                
+
+    ///make the drop-down list
+
+        //load the categories and use them to fill the selector options
+        var xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var categories = JSON.parse(this.responseText);
+                    makeselector_dropcat(categories);
+                    }
+                };
+            xhttp.open("GET", "usermap.php?functionToCall=getCategories", true);
+            xhttp.send();}
+
+
+        //selector for categories   
+        function makeselector_dropcat(categories){
+            for (let i = 0; i < categories.length; i++){
+                var optionElement = document.createElement("option");
+                optionElement.innerHTML = categories[i].name;
+                optionElement.value =  categories[i].name;
+                L.DomUtil.get("dropdowncategories").appendChild(optionElement);}
+
+             
+            var category_select = L.DomUtil.get("dropdowncategories");
+            L.DomEvent.addListener(category_select, 'click', function(e) {
+            L.DomEvent.stopPropagation(e);
+            });
+            L.DomEvent.addListener(category_select, 'change', catselectionHandler);
+        
+        }
+
+
+        //handle selection of a category
+        function catselectionHandler(e) {
+            category = e.target.value;
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "usermap.php?functionToCall=getSubcategories", true);
+            xhttp.setRequestHeader("cat_name", "string");
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {  
+                    subcategories = JSON.parse(this.responseText);
+                    makeselector_dropsubcat(subcategories,e.target.value);
+                    document.getElementById("return_btn").onclick = goback;
+                    }
+                };
+            xhttp.send(e.target.value); 
+        } 
+        
+
+        function makeselector_dropsubcat(subcategories, category){
+            flag = 1;
+            if(document.getElementById("input_field")) document.getElementById("input_field").remove();
+             
+            var options = document.querySelectorAll('#dropdowncategories option');
+            options.forEach(o => o.remove());
+            document.getElementById("dropdowncategories").innerHTML = "<option value='' default selected>"+category+" - Υποκατηγορίες</option>";    
+                
+            for (let i = 0; i < subcategories.length; i++){
+                var optionElement = document.createElement("option");
+                optionElement.innerHTML = subcategories[i].name;
+                optionElement.value =  subcategories[i].name;
+                L.DomUtil.get("dropdowncategories").appendChild(optionElement);}
+
+
+            var category_select = L.DomUtil.get("dropdowncategories");
+            L.DomEvent.removeListener(category_select, 'change');
+            L.DomEvent.addListener(category_select, 'click', function(e) {
+            L.DomEvent.stopPropagation(e);
+            });
+            L.DomEvent.addListener(category_select, 'change', subcatselectionHandler);
+        }
+
+        //handle selection of a subcategory
+        function subcatselectionHandler(e) {
+            subcategory = e.target.value;
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "usermap.php?functionToCall=getProducts", true);
+            xhttp.setRequestHeader("subcat_name", "string");
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    products = JSON.parse(this.responseText);
+                    makeselector_dropprods(products,e.target.value);
+                    }
+                };
+            xhttp.send(e.target.value); 
+        } 
+
+      
+        function makeselector_dropprods(products, subcategory){
+            flag = 2;
+            if(document.getElementById("input_field")) document.getElementById("input_field").remove();
+
+            var options = document.querySelectorAll('#dropdowncategories option');
+            options.forEach(o => o.remove());
+            document.getElementById("dropdowncategories").innerHTML = "<option value='' default selected>"+subcategory+" - Προϊόντα</option>";    
+                
+            for (let i = 0; i < products.length; i++){
+                var optionElement = document.createElement("option");
+                optionElement.innerHTML = products[i].name;
+                optionElement.value =  products[i].name;
+                L.DomUtil.get("dropdowncategories").appendChild(optionElement);}
+            
+            var category_select = L.DomUtil.get("dropdowncategories");
+            L.DomEvent.removeListener(category_select, 'change');
+            L.DomEvent.addListener(category_select, 'click', function(e) {
+            L.DomEvent.stopPropagation(e);
+            });
+            L.DomEvent.addListener(category_select, 'change', prodsselectionHandler);
+        }
+
+
+        //handle selection of a product
+        function prodsselectionHandler(e) {
+            flag = 3;
+            prodssearchHandler(e.target.value);} 
+
+
+        //handle the return button when submitting an offer
+        function goback(){
+            var category_select = L.DomUtil.get("dropdowncategories");
+            L.DomEvent.removeListener(category_select, 'change');
+
+            if(flag == 1){
+                document.getElementById("dropdowncategories").remove();
+                document.getElementById("search_field").remove();
+                dropdowncategories(submit_offer_poi);
+            }
+            else if(flag==2){
+                makeselector_dropsubcat(subcategories, category);}
+            else if(flag==3){
+                document.getElementById("input_field").remove();
+                makeselector_dropprods(products, subcategory);}
+        }
+
+
+        var currentFocus;
+
+        //make the autocomplete feature
+        function autocomplete(inp, arr) {
+
+            //listener for when someone is writing in the text field
+            inp.addEventListener("input", function(e) {
+                var a, b, i, val = this.value;
+                closeAllLists(this.value,inp);
+                if (!val) { return false;}
+                currentFocus = -1;
+                
+                a = document.createElement("DIV");
+                a.setAttribute("id", "autocomplete-list");
+                a.setAttribute("class", "autocomplete-items");
+                this.parentNode.appendChild(a);
+                
+                for (i = 0; i < arr.length; i++) {
+                    if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                        b = document.createElement("DIV");
+                        b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+                        b.innerHTML += arr[i].substr(val.length);
+                        /*insert a input field that will hold the current array item's value:*/
+                        b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                        a.appendChild(b);
+
+                    //listener for when an autocomplete option is clicked
+                    b.onclick = function(e) {
+                    inp.value = this.getElementsByTagName("input")[0].value;
+                    document.getElementById("autocomplete-list").style.visibility = "hidden";
+                    }
+                    }
+                }
+            });
+
+            //listener for when a key is pressed
+            inp.addEventListener("keydown", function(e) {
+                var x = document.getElementById("autocomplete-list");
+                if (x) x = x.getElementsByTagName("div");
+                if (e.keyCode == 40) { //down key
+                    currentFocus++;
+                    addActive(x);}
+                else if (e.keyCode == 38) { //up key
+                    currentFocus--;
+                    addActive(x);}
+                else if (e.keyCode == 13) { //enter key
+                    if (currentFocus > -1) {
+                        if (x) x[currentFocus].click();}
+
+                var found = false;        
+                for(let i=0; i<prodsautocomplete.length; i++){
+                    if(inp.value == prodsautocomplete[i]){
+                        found = true;
+                        break
+                    }}
+
+                if(!found) alert("Το προϊόν δεν βρέθηκε")
+                else prodssearchHandler(inp.value);  
+            }
+            });}
+
+
+
+        //handle search of a product
+        function prodssearchHandler(prod) {
+            
+            if(!document.getElementById("input_field")){
+            var prodElement = document.createElement("input");
+                prodElement.id = "input_field";
+                prodElement.type = "text";
+                prodElement.placeholder = "Τιμή (€)";
+                document.getElementById("price_field").appendChild(prodElement);}
+                
+            var checkdecimal = /^\d+(\.\d{1,2})?$/;
+            document.getElementById("price_field").onkeydown = function() {
+                if(event.keyCode == 13){ //if "Enter" pressed
+                    if(checkdecimal.test(document.getElementById("input_field").value)){ //if input has correct form
+                        var data = {user: username, price:document.getElementById("input_field").value, poi: submit_offer_poi.id,
+                        prod_name: prod};
+                        var xhttp = new XMLHttpRequest();
+                        xhttp.open("POST", "usermap.php?functionToCall=newOffer", true);
+                        xhttp.setRequestHeader("newoffer_info", "string");
+                        xhttp.onload = function() {
+                            if (this.readyState == 4 && this.status == 200) {
+                                //if(this.responseText == "no") alert("Λυπούμαστε, δεν κερδίσατε πόντους");
+                                //else alert("Κερδίσατε πόντους!");
+                                alert(this.responseText);
+                                }
+                            };
+                        xhttp.send(JSON.stringify(data));
+                    } 
+                    else alert("Σφάλμα: Δεν δόθηκε έγκυρη είσοδος");
+                document.getElementById("input_field").value = "";
+                }
+            } } 
+
+
+        function closeAllLists(elmnt,inp) {
+            //close the items of the autocomplete except for the selected one
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != inp){
+                    x[i].parentNode.removeChild(x[i]);}
+            }
+        }
+
+
+        function addActive(x) {
+        /*a function to classify an item as "active":*/
+        if (!x) return false;
+        /*start by removing the "active" class on all items:*/
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        /*add class "autocomplete-active":*/
+        x[currentFocus].classList.add("autocomplete-active");
+        }
+
+        function removeActive(x) {
+            /*a function to remove the "active" class from all autocomplete items:*/
+            for (var i = 0; i < x.length; i++) {
+            x[i].classList.remove("autocomplete-active");
+            }
+        }
 
     </script>    
     
