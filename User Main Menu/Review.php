@@ -27,6 +27,7 @@
         <th>Απόθεμα</th>
         <th id=moreless>Περισσότερα</th>
         </tr>";
+
       
         while($row = mysqli_fetch_array($result)) {
           echo "<td>" . $row['id'] . "</td>";
@@ -62,7 +63,7 @@
         
         echo "<tr>";
       while($row = mysqli_fetch_array($result)) {
-          echo "<td><img id=prodimg src='".$row['url']."' alt='Φωτογραφία προϊόντος'></td>";
+          echo "<td><img id=prodimg src='images/".$row['url']."' alt='Φωτογραφία προϊόντος'></td>";
           echo "<td>" . $row['username'] . "</td>";
           echo "<td>" . $row['t_score'] . "</td>";
           echo "<td class=stockupd><i class='fa fa-paste' style='font-size:110%;'></i></td>";
@@ -72,6 +73,7 @@
           else if($row['stock'] == 'ναι'){
             echo "<td class=thumbdown><i class='fa fa-thumbs-down' style='font-size:110%;'></i></td>";
             echo "<td class=thumbup><i class='fa fa-thumbs-up' style='font-size:110%;'></i></td>";}
+          if($_SESSION['user_type'] == 'admin') echo "<td class=delete><i class='fa fa-trash'></i></td>";  
         }
         echo "</tr>";
         
@@ -99,6 +101,7 @@
           echo $row['lcount'];
         }
 
+      date_default_timezone_set("Europe/Athens");    
       $sql="INSERT INTO ldhistory (id,username, type, offer_id,datetime) VALUES (null,'".$_SESSION['username']."',
       '".$click_type."','".$offer_id."','".date('Y-m-d H:i:s')."')";   
       mysqli_query($con, $sql);   
@@ -107,8 +110,8 @@
     }
 
 
-    function updateOfferDislikes()  
-    {
+     function updateOfferDislikes()  
+     {
       $offer_info = json_decode(file_get_contents("php://input"), true);
       $offer_id = $offer_info['offerid'];
       $offer_dislikes = $offer_info['dislikescount'];
@@ -126,6 +129,7 @@
       while($row = mysqli_fetch_array($result)) {
           echo $row['dcount'];}
 
+      date_default_timezone_set("Europe/Athens");    
       $sql="INSERT INTO ldhistory (id,username, type, offer_id,datetime) VALUES (null,'".$_SESSION['username']."',
       '".$click_type."','".$offer_id."','".date('Y-m-d H:i:s')."')";   
       mysqli_query($con, $sql);    
@@ -151,8 +155,6 @@
         else echo 1;
         }
       
-      mysqli_query($con, $sql);    
-
     mysqli_close($con);
   }
 
@@ -174,8 +176,6 @@
        else echo 1;
        }
      
-     mysqli_query($con, $sql);    
-
    mysqli_close($con);
   }
 
@@ -201,6 +201,17 @@
     echo $new_stock;
 
   mysqli_close($con);
+  }
+
+
+  function deleteOffer(){
+    $offer_id = file_get_contents("php://input");
+
+    $con = mysqli_connect('localhost','root','');
+    mysqli_select_db($con,"ekatanalotis");
+    $sql = "DELETE FROM offers WHERE id='".$offer_id."' ";
+    mysqli_query($con, $sql); 
+    
   }
       
 

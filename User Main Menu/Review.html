@@ -27,15 +27,21 @@
         .more_btn{
         font-size: 70%;}
 
-        .more_btn:hover,.thumbup .fa.fa-thumbs-up:hover,.thumbdown .fa.fa-thumbs-down:hover, .fa.fa-paste:hover{
+        .more_btn:hover,.thumbup .fa.fa-thumbs-up:hover,.thumbdown .fa.fa-thumbs-down:hover,
+        .fa.fa-paste:hover{
             cursor: pointer;
             color: rgba(0, 0, 0, 0.4);
         }
 
-        .clickedthumbup{color:green;}
-        .clickedthumbdown{color:red;}
+        .delete:hover{
+            cursor: pointer;
+            color: rgba(255, 10, 10, 0.4);
+        }
 
-        .clickedthumbdown:hover{
+        .clickedthumbup{color:green;}
+        .clickedthumbdown, .delete{color:red;}
+
+        .clickedthumbdown:hover, .fa.fa-trash:hover{
             cursor: pointer;
             color: rgba(255, 10, 10, 0.4);
         }
@@ -63,11 +69,9 @@
     <div id="offers"></div>
 
     <script>
-        //if username session is not set, aka if user didn't log in or session expired, go back to login page
-        var isloggedin = "<?php if(!isset($_SESSION['username'])) echo 1; else echo 0;?>";
-        if(!isloggedin) window.location.replace("Login.html"); 
-
+        //if poi_id is not set, aka if user tried to access the page directly and/or the session has expired, go back to login page
         var poi_id = sessionStorage.getItem("poi_id"); //get id of selected POI
+        if(poi_id == null) window.location.replace("Login.html");
         
         xhttp = new XMLHttpRequest();
             xhttp.open("POST", "Review.php?functionToCall=getPoiOffers", true);
@@ -84,10 +88,12 @@
                 };
         xhttp.send(poi_id);  
 
+
 ///if the 'more' or 'less' buttons are clicked, show or hide more info respectively
         var getmoreinfo = function(e) {
         
             var row = e.target.parentElement; //get parent element of the clicked element, aka the selected row
+            //if 'more' is clicked
             if(e.target.textContent.charCodeAt(0) == 9660){ //decimal value of the hex 'down-triangle' html entity
                 e.target.innerHTML = '&#x25B2';                
 
@@ -107,7 +113,7 @@
                         dlelements = document.querySelectorAll('.thumbdown .fa.fa-thumbs-down');
                         lelements = document.querySelectorAll('.thumbup .fa.fa-thumbs-up');
                         updelements = document.querySelectorAll('.fa.fa-paste');
-                       
+                        delelements = document.querySelectorAll('.fa.fa-trash');
 
                         for (var i = 0; i < dlelements.length; i++) {
                             dlelements[i].onclick = dislikehandler;
@@ -116,10 +122,14 @@
 
                         for (var i = 0; i < updelements.length; i++) {
                             updelements[i].onclick = updstockhandler;} 
+
+                        for (var i = 0; i < delelements.length; i++) {
+                            delelements[i].onclick = deletehandler;}     
                             
                     }
                     };
                 xhttp.send(row.firstChild.innerHTML);} //send the first child of the row, aka the offer id
+            //if 'less' is clicked    
             else {
                 e.target.innerHTML = '&#x25BC';
                 document.getElementById("offers_table").deleteRow(row.rowIndex+2);
@@ -191,7 +201,6 @@
         function updatelikes(e,row,offer_id,flag){
             likescnt = document.getElementById("offers_table").rows[row.rowIndex-2].cells[2].innerHTML;
             var typeclick;
-            console.log(flag);
             if(flag == 0)
             //if(likes_click[offer_id-1] % 2 == 0)  //if even number of like clicks
                 {likescnt++;
@@ -228,6 +237,27 @@
                     document.getElementById("offers_table").rows[row.rowIndex-2].cells[7].innerHTML = this.responseText;
                 }
                 xhttp.send(offer_id);  
+        }
+
+
+        //handle pressing the delete offer button
+        function deletehandler(e){
+            if(confirm("Θέλετε σίγουρα να διαγράψετε την προσφορά;")){
+            var row = e.target.closest("tr"); //get closest ancestor <tr> element of the clicked element, aka the selected row
+            offer_id = document.getElementById("offers_table").rows[row.rowIndex-2].cells[0].innerHTML; //get the respective offer id
+            
+            document.getElementById("offers_table").deleteRow(row.rowIndex-2);
+            document.getElementById("offers_table").deleteRow(row.rowIndex-1);  
+            document.getElementById("offers_table").deleteRow(row.rowIndex);    
+
+            xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "Review.php?functionToCall=deleteOffer", true);
+                xhttp.setRequestHeader("offer_info", "string");
+                xhttp.onload = function(){
+                    alert("Διαγράφηκε!");
+                }
+                xhttp.send(offer_id);       
+        }  
         }
 
         
