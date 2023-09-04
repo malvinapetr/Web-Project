@@ -5,40 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Είσοδος στον ιστότοπο</title>
     <link rel="stylesheet" href="styles/login.css">   
-    <style>
-        /*username-password div */
-        .username-password {
-            position:relative;
-            display:grid;
-            max-width: 35%;
-            min-width: 250px;
-            margin: 0 auto;
-            margin-top: 17%; 
-            align-items: center;
-        }
-
-        .buttons{
-            display: block;
-            text-align: center;
-            position:relative;
-
-        }
-    </style>
+    
 </head>
 <body>
-    <form class="login-form" method="post" action="LoginForm.php?functionToCall=checkLogin">
     <div class="form-stuff">   
         <div class="username-password">
             <label for="username">Username:</label><br>
             <input type="text" placeholder="Username" id="username" name="username"><br><br>
             <label for="password">Κωδικός:</label><br>
             <input type="password" placeholder="Κωδικός" id="password" name="password"><br>
+            <div id="content"></div>
         </div>
-        <div>
-            <input type="submit" name= "login" value="Είσοδος">
-            <input type="submit" name="signup" value="Εγγραφή">
+        <div class="buttons">
+            <button id="login_btn" onclick="login()">Είσοδος</button>
+            <button id="signup_btn" onclick="signup()">Εγγραφή</button>
         </div> 
     </div>    
-    </form>
+
+    <script>
+
+        function login(){
+
+        var data = {username: document.getElementById("username").value, password:document.getElementById("password").value,
+                    type: "login"};
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "LoginForm.php?functionToCall=checkLogin", true);
+        xhttp.setRequestHeader("user_info", "string");
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                if(this.responseText == "Σύνδεση χρήστη") window.location.href = "UserMain.html";
+                else if(this.responseText == "Σύνδεση διαχειριστή") window.location.href = "AdminMain.html";
+                else document.getElementById("content").innerHTML = this.responseText;
+                }
+            };
+        xhttp.send(JSON.stringify(data));
+        }
+
+
+        function signup(){
+
+        var data = {username: document.getElementById("username").value, password:document.getElementById("password").value,
+                    type: "signup"};
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "LoginForm.php?functionToCall=checkLogin", true);
+        xhttp.setRequestHeader("user_info", "string");
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                if(this.responseText == "Επιτυχία") window.location.href = "UserMain.html";
+                else document.getElementById("content").innerHTML = this.responseText;
+                }
+            };
+        xhttp.send(JSON.stringify(data));
+        }
+
+    </script>
+
 </body>
 </html>

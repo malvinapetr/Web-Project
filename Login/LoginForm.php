@@ -4,16 +4,14 @@ if (isset($_GET['functionToCall']) && function_exists($_GET['functionToCall'])) 
   call_user_func($_GET['functionToCall']);
 }
 
+
 function checkLogin()
 {
-echo "<body style=background-color:darkblue;>";
-if(isset($_POST["login"])) $con_type = "login";   // for log-in
-else if(isset($_POST["signup"])) $con_type = "sign up";  //for sign-up
-else header("Location: Login.html");   //for attempt to type the url right away, goes back to log-in form
+$user_info = json_decode(file_get_contents("php://input"), true);
+$username = trim($user_info['username']);
+$password = trim($user_info['password']);
+$con_type = $user_info['type'];
 
-//remove potential space from around the inputs
-$username = trim($_POST["username"]);   
-$password = trim($_POST["password"]);
 
 //remove potential space from inside the inputs
 $username = str_replace(' ','', $username);
@@ -21,10 +19,7 @@ $password = str_replace(' ','', $password);
 
 $check = 0;
 
-if(!$username || !$password) {              //if username or password is blank
-    header("Refresh:0; url=Login.html");   
-    echo "<script>alert('Κανένα πεδίο δεν μπορεί να είναι κενό!')</script>";  
-    }
+if(!$username || !$password) echo "Κανένα πεδίο δεν μπορεί να είναι κενό!";          //if username or password is blank
 else $check = checkPassword($password);   //check that the password has correct format before accessing the database
 
 
@@ -46,16 +41,19 @@ if($check){          //if password has correct format then start accessing the d
 
           if(mysqli_num_rows($result) == 0 || $fetched["password"] != $password) {     //if username not in the database
             header("Refresh:0; url=Login.html");    
-            echo "<script>alert('Λάθος username ή κωδικός!')</script>";
+            echo "Λάθος username ή κωδικός!";
           }
           else{
             $_SESSION['username'] = $username;
-            if($fetched["type"] == "user") header("Refresh:0; url=UserMain.html");
-            else header("Refresh:0; url=AdminMain.html");   
-            echo "<script>alert('Επιτυχημένη σύνδεση!')</script>";
+            if($fetched["type"] == "user") {
+              echo "Σύνδεση χρήστη";
+              $_SESSION['user_type'] = 'user';}
+            else {
+              echo "Σύνδεση διαχειριστή";
+              $_SESSION['user_type'] = 'admin';}
           }
         }
-        else {                              //case = sign-up
+        else if ($con_type == "signup") {                              //case = sign-up
         
         if(mysqli_num_rows($result) == 0){          // if no other user with the same username create user
             $sql = "INSERT INTO user (username, password, type,t_score,m_score,t_tokens,m_tokens,signup_date)
@@ -68,14 +66,11 @@ if($check){          //if password has correct format then start accessing the d
             mysqli_stmt_bind_param($stmt,"sssiiiis",$username,$password,$user_type,$zero,$zero,$zero,$zero,$date);
             mysqli_stmt_execute($stmt);
 
-            $_SESSION['usename'] = $username;
-            header("Refresh:0; url=UserMain.html");    
-            echo "<script>alert('Επιτυχημένη εγγραφή!')</script>";
+            $_SESSION['username'] = $username;
+            echo "Επιτυχία";
         }
-        else {   //if there is another user with same username
-            header("Refresh:0; url=Login.html");    
-            echo "<script>alert('Υπάρχει ήδη χρήστης με αυτό το username!')</script>";  
-        }
+        else  echo "Υπάρχει ήδη χρήστης με αυτό το username!";
+    
         }
     }
   //catch exception
@@ -91,8 +86,7 @@ if($check){          //if password has correct format then start accessing the d
 function checkPassword($password){
     if(strlen($password) < 8 || !preg_match('/[A-Z]/', $password) || !preg_match('/[0-9]/', $password) 
     || !preg_match('/[@_!.,#$%^&*()<>?|}{~:]/',$password)) {
-        header("Refresh:0; url=Login.html");    
-        echo "<script>alert('Δεν δόθηκε έγκυρος κωδικός!')</script>";
+        echo "Δεν δόθηκε έγκυρος κωδικός!";
         return 0;
     }
 return 1;    
