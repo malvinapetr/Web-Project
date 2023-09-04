@@ -47,8 +47,8 @@
         
         if(!mediaQuery.matches){     //standard location point for when geolocation doesn't work/is inaccurate, aka when using laptop/pc 
             
-        map.setView([38.234,21.7372], 14);
-            var marker = L.marker([38.234,21.7372],{title: "Τοποθεσία"}).bindPopup('Τοποθεσία χρήστη').addTo(map);
+        map.setView([38.2315,21.7396], 14);
+            var marker = L.marker([38.2315,21.7396],{title: "Τοποθεσία"}).bindPopup('Τοποθεσία χρήστη').addTo(map);
             marker._icon.classList.add("self_huechange");
         }
         else{         //else use geolocation to find user's location, aka when using ipad/phone
@@ -228,7 +228,7 @@
                 else{          //else hide the marker and its shadow and bind the appropriate pop-up
                     marker._icon.classList.add("hide");
                     marker._shadow.classList.add("hide");
-                    if(getDistance(marker._latlng) <= 400) marker.on('click', noofferspopuphandler);
+                    if(getDistance(marker._latlng) <= 50) marker.on('click', noofferspopuphandler);
                     else marker.bindPopup("<h4><center>"+ pois_info[i][1] + "</h4>");  }
                 }
             }
@@ -254,7 +254,7 @@
                 if (this.readyState == 4 && this.status == 200) {  
                     info = this.responseText;  
                                   
-                    if(getDistance(marker._latlng) <= 400){ //if distance of the POI and the user's location is <= 50 meters
+                    if(getDistance(marker._latlng) <= 50){ //if distance of the POI and the user's location is <= 50 meters
                         marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo>"+info+
                             "</div><button id=review_btn>Αξιολόγηση προσφοράς</button><button id=addreview_btn>Προσθήκη προσφοράς</button>", 
                             {maxWidth : "auto"}).openPopup();
