@@ -7,8 +7,38 @@
     <title>Μενού Διαχειριστή</title>
 
     <style>
+
+        body::before{
+            content: "";
+            background: url("images/supermarket.jpg");
+            opacity: 0.07;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            position: absolute;
+            z-index: -1;  
+        }
+
+        #leaderboard_tbl{
+            margin-top: 4%;
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+            background-color: rgb(52, 139, 232, 0.45); 
+            border-radius: 3px;
+        }
+
+        th,td{
+            text-align: center;
+            padding: 10px 25px 10px 25px;
+        }
+
+        tr{border-bottom: 2px ridge black;}
+
+        
         #updProd, #delProd, #leaderboard_btn, #updPOIs,
-        #delPOIs{
+        #delPOIs, #usermenu, #previous, #next, #logout{
             margin-top: 10px;
             margin-right: 20px;
             padding: 12px 22px 12px 22px;
@@ -20,29 +50,34 @@
 
         }
 
+        #logout{
+            color:white;
+            background-color: rgb(212, 0, 0);
+            display: inline;
+            margin-left: 27%;
+            margin-top: 35%;
+        }
+
         #updProd{
             margin-left: 10px;
         }
 
         #updProd:hover, #delProd:hover, #leaderboard_btn:hover,
-        #updPOIs:hover, #delPOIs:hover{
+        #updPOIs:hover, #delPOIs:hover, #usermenu:hover, #previous:hover,
+        #next:hover, #logout:hover{
             cursor: pointer;
             opacity: 0.85;
         }
 
         #previous, #next{
             visibility:hidden;
-            padding: 7px;
-            padding-left: 3px;
-            padding-right: 3px;
+            padding: 5px 10px 5px 10px;
             margin: 5px;
             margin-top: 10px;
         }
 
         #previous{
-            margin-left:45%;
-            padding-left: 10px;
-            padding-right: 10px;
+            margin-left:47%;     
         }
 
     </style>  
@@ -55,13 +90,28 @@
     <button id="leaderboard_btn" onclick="showleader()">Προβολή Leaderboard</button>
     <button id="updPOIs" onclick="insertupdatepois()">Ανέβασμα POIs</button> 
     <button id="delPOIs" onclick="deletepois()">Διαγραφή POIs</button> 
+    <button id="usermenu" onclick="usermenu()">Μενού χρήστη</button> 
     <div id="leaderboard"></div>
-        <button id="previous" onclick="select_prev()">Πίσω</button>
-        <button id="next" onclick="select_next()">Εμπρός</button>
-    
+        <button id="previous" onclick="select_prev()">&#x2190</button>
+        <button id="next" onclick="select_next()">&#x2192</button>
+    <button id="logout" onclick="logout()">Αποσύνδεση</button>
     
     <script>
+
+
+///if username not set or session expired, go back to login page        
+var username = null; //get current user's username
+        xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                username = this.responseText;
+                if(username == '') window.location.replace("Login.html");
+                }
+            };
+        xhttp.open("GET", "LoginForm.php?functionToCall=getUsername", true);
+        xhttp.send();  
         
+
         function deletedata() {
             if(confirm("Θέλετε σίγουρα να διαγράψετε όλα τα δεδομένα;")){  
                 var xhttp = new XMLHttpRequest();
@@ -90,6 +140,7 @@
                 xmlhttp.onload = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     document.getElementById("leaderboard").innerHTML = this.responseText;
+                    document.getElementById("logout").style.marginTop = '0%';
                     document.getElementById("previous").style.visibility = "visible";
                     document.getElementById("next").style.visibility = "visible";
                     }
@@ -98,6 +149,7 @@
                 xmlhttp.send();
             }
             else {                                                // case = hide leaderboard
+                document.getElementById("logout").style.marginTop = '35%';
                 document.getElementById("previous").style.visibility = "hidden";
                 document.getElementById("next").style.visibility = "hidden";
                 leaderboard_btn.innerHTML = "Προβολή Leaderboard"
@@ -124,7 +176,6 @@
                 if (this.readyState == 4 && this.status == 200) {
                     document.getElementById("leaderboard").innerHTML = " ";
                     document.getElementById("leaderboard").innerHTML = this.responseText;
-                    console.log(this.responseText);
                     }
                 };
             xhttp.open("GET", "Leaderboard.php?functionToCall=selectprev", true);
@@ -153,6 +204,25 @@
           xhttp.open("GET", "insert_delete_poiData.php?functionToCall=insert_update", true);
           xhttp.send();
         }
+
+
+        function usermenu(){
+            window.location.href = "UserMain.html";
+        }
+
+
+        function logout(){
+            //call php file to destroy session, then move to Login page
+            if(confirm("Θέλετε σίγουρα να αποσυνδεθείτε;")){
+            var xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                    if (this.readyState == 4 && this.status == 200) 
+                        window.location.href = "Login.html";
+                    };
+            xhttp.open("GET", "Logout.php", true);
+            xhttp.send();
+        }}
+
     </script>
 
 </body>

@@ -1,28 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-table {
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 20px;  
-  width: 40%;
-  border-collapse: collapse;
-}
-
-table, td, th {
-  border: 1px solid black;
-  padding: 10px;
-  text-align: center;
-}
-
-</style>
-</head>
-<body>
-
 <?php
+
 session_start();
 if(!isset($_SESSION['tpages'])){
     $_SESSION['tpages']=0;
@@ -53,7 +30,7 @@ $offset = $_SESSION['tpages']*10;
 $sql="SELECT username,t_score, m_tokens, t_tokens FROM user ORDER BY t_score DESC LIMIT $offset,10"; 
 $result = mysqli_query($con,$sql);
 
-echo "<table>
+echo "<table id=leaderboard_tbl>
 <tr>
 <th>Rank</th>
 <th>Username</th>

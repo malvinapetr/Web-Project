@@ -38,8 +38,9 @@
         $current_error_mode = $conn->getAttribute(PDO::ATTR_ERRMODE);
          
       //code to check if there's any products in the database that don't exist in the file that will be uploaded   
-        $json_data = file_get_contents("prod_test.json",TRUE);
+        $json_data = file_get_contents("products.json",TRUE);
         $results_json = json_decode($json_data, JSON_OBJECT_AS_ARRAY);
+        $prods_json = $results_json["products"];
         $sql = "SELECT id FROM products";
         $results_db = $conn->query($sql)->fetchAll();
   
@@ -49,7 +50,7 @@
         foreach ($results_db as $rsdb){
           $id = $rsdb["id"];
           
-          foreach ($results_json as $rsjson){
+          foreach ($prods_json as $rsjson){
             $json_id = $rsjson["id"];
           
             if($json_id == $id) {
@@ -58,7 +59,7 @@
           }
           $items_db++; 
         }
-      
+
       if($items_db == $count) delete();    //if all the products of the database are included in the file that will be loaded  
                                           //then delete everything that was already there 
       elseif($items_db > $count && $count > 0){    // otherwise only delete the products that are also in the file
@@ -71,7 +72,7 @@
       //code for updating the 'categories' ans 'subcategories' tables  
         $stmt = $conn->prepare("INSERT IGNORE INTO categories(cid,name) VALUES(?,?)");
         $stmt1 = $conn->prepare("INSERT IGNORE INTO subcategories(uuid,name,category) VALUES(?,?,?)");
-        $json_data = file_get_contents("prod_test.json",TRUE);
+        $json_data = file_get_contents("products.json",TRUE);
         $info = json_decode($json_data, JSON_OBJECT_AS_ARRAY);
         $cat_info = $info["categories"];
 
@@ -101,7 +102,7 @@
 
       //code for updating the 'products' table
         $stmt = $conn->prepare("INSERT INTO products(id,name,category,subcategory) VALUES(?,?,?,?)");
-        $json_data = file_get_contents("prod_test.json");
+        $json_data = file_get_contents("products.json");
         $info = json_decode($json_data, JSON_OBJECT_AS_ARRAY);
         $products = $info["products"];
          
