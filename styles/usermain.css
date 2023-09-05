@@ -60,6 +60,26 @@ option[default] {
     .leaflet-popup-tip {
     display: none;}
 
+    /* for laptop/pc/tablet */
+    @media only screen and (min-width: 768px){ 
+    .leaflet-popup-content {
+    border-radius: 3px;    
+    background-color: rgba(52, 139, 232, 0.35);     
+    max-height: 300px;
+    overflow-y: scroll;
+    }}
+
+    /* for phone */
+    @media only screen and (max-width: 768px){ 
+    .leaflet-popup-content {
+    border-radius: 3px;    
+    font-size: 10px;
+    background-color: rgba(65, 148, 243, 0.35);
+    max-width: 200px;
+    max-height: 200px;
+    overflow-y: scroll;
+    }}
+
     #return_btn{
         margin-bottom: 5px;
         background-color: rgba(65, 148, 243, 0.35);
@@ -72,8 +92,6 @@ option[default] {
     #prodInfo, #dropCat{
         text-align: center;
         padding: 3px 5px 3px;
-        border-radius: 3px;
-        background-color: rgba(52, 139, 232, 0.35); 
     }
 
     
@@ -137,20 +155,42 @@ option[default] {
         opacity: 0.8;
     }
 
-    #review_btn, #addreview_btn,#nooffer_addreview_btn{
-        padding: 5px;
-        background-color: rgba(52, 139, 232, 0.35);
-        border: 1px ridge black; 
-        border-radius: 5px;
-        transition: background-color 0.3s;
+    /* for laptop/pc/tablet */
+    @media only screen and (min-width: 768px){ 
+        #review_btn, #addreview_btn,#nooffer_addreview_btn{
+            padding: 5px;
+            background-color: rgba(52, 139, 232, 0.35);
+            border: 1px ridge black; 
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin: 15px;
+        }
+    
+        #review_btn, #addreview_btn{
+            margin-left: 40px;
+        }
+
+        #addreview_btn{margin-left: 90px;}
     }
 
-    #review_btn, #addreview_btn{
-        margin: 15px;
-        margin-left: 40px;
-    }
+    /* for phone */
+    @media only screen and (max-width: 768px){ 
+        #review_btn, #addreview_btn,#nooffer_addreview_btn{
+            padding: 5px;
+            background-color: rgba(52, 139, 232, 0.35);
+            border: 1px ridge black; 
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin: 15px;
+        }
 
-    #addreview_btn{margin-left: 90px;}
+        #review_btn, #addreview_btn{
+            margin-top: 15px;}
+
+        #addreview_btn{
+            margin-bottom: 10px;}     
+    }    
+
 
     #review_btn:hover, #addreview_btn:hover, #nooffer_addreview_btn:hover, 
     #return_btn:hover{
