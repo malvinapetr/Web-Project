@@ -7,7 +7,23 @@
     <title>Αξιολόγηση Προσφοράς</title>
 
     <style>
+
+        body::before{
+                content: "";
+                background: url("../images/supermarket.jpg"); 
+                opacity: 0.07;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                position: absolute;
+                z-index: -1;  
+            }
+
+        /* for laptop/pc/tablet */
+        /* @media only screen and (min-width: 660px){  */
         #offers{
+            overflow-y: scroll;
             margin-top: 30px;
             text-align: center;
             padding: 3px 5px 3px;
@@ -15,6 +31,13 @@
             background-color: rgba(52, 139, 232, 0.35); 
             display: grid;
             border:2px ridge black;}
+
+
+        /* for phone */
+        @media only screen and (max-width: 660px){ 
+        #offers{
+            font-size: 10px;}}
+
 
         #offers_table{border-collapse: collapse;}
 
