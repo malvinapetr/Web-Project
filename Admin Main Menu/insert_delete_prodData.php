@@ -38,7 +38,7 @@
         $current_error_mode = $conn->getAttribute(PDO::ATTR_ERRMODE);
          
       //code to check if there's any products in the database that don't exist in the file that will be uploaded   
-        $json_data = file_get_contents("products.json",TRUE);
+        $json_data = file_get_contents("JSON/products.json",TRUE);
         $results_json = json_decode($json_data, JSON_OBJECT_AS_ARRAY);
         $prods_json = $results_json["products"];
         $sql = "SELECT id FROM products";
@@ -72,7 +72,7 @@
       //code for updating the 'categories' ans 'subcategories' tables  
         $stmt = $conn->prepare("INSERT IGNORE INTO categories(cid,name) VALUES(?,?)");
         $stmt1 = $conn->prepare("INSERT IGNORE INTO subcategories(uuid,name,category) VALUES(?,?,?)");
-        $json_data = file_get_contents("products.json",TRUE);
+        $json_data = file_get_contents("JSON/products.json",TRUE);
         $info = json_decode($json_data, JSON_OBJECT_AS_ARRAY);
         $cat_info = $info["categories"];
 
@@ -102,7 +102,7 @@
 
       //code for updating the 'products' table
         $stmt = $conn->prepare("INSERT INTO products(id,name,category,subcategory) VALUES(?,?,?,?)");
-        $json_data = file_get_contents("products.json");
+        $json_data = file_get_contents("JSON/products.json");
         $info = json_decode($json_data, JSON_OBJECT_AS_ARRAY);
         $products = $info["products"];
          
@@ -123,7 +123,7 @@
       
         //code for updating the 'prices' table
         $stmt = $conn->prepare("INSERT INTO prices(name,date,price) VALUES(?,?,?)");
-        $json_data = file_get_contents("prices_test.json",TRUE);
+        $json_data = file_get_contents("JSON/prices.json",TRUE);
         $info = json_decode($json_data, JSON_OBJECT_AS_ARRAY);
         $price_info = $info["data"];
 

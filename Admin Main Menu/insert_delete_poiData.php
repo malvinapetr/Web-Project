@@ -39,7 +39,7 @@
            
         //code for updating the 'pois' table 
           $stmt = $conn->prepare("INSERT IGNORE INTO pois(id,name,latitude,longitude) VALUES(?,?,?,?)");
-          $json_data = file_get_contents("POIs.geojson",TRUE);
+          $json_data = file_get_contents("JSON/POIs.geojson",TRUE);
           $poi_info = json_decode($json_data, JSON_OBJECT_AS_ARRAY);
           
           $feats = $poi_info["features"];
