@@ -44,14 +44,24 @@
                 maxZoom: 19,
                 attribution: '© OpenStreetMap'
             }).addTo(map);
+
+        var currMarkers = getMarkers(map);    
         
         if(!mediaQuery.matches){     //standard location point for when geolocation doesn't work/is inaccurate, aka when using laptop/pc 
             
+        //if there's already a user location marker, delete it
+        for (let j = 0; j < currMarkers.length-1; j++){
+            if(currMarkers[j].options.title == 'Τοποθεσία') map.removeLayer(currMarkers[j]);}
+
         map.setView([38.2315,21.7396], 14);
             var marker = L.marker([38.2315,21.7396],{title: "Τοποθεσία"}).bindPopup('Τοποθεσία χρήστη').addTo(map);
             marker._icon.classList.add("self_huechange");
         }
         else{         //else use geolocation to find user's location, aka when using ipad/phone
+
+        //if there's already a user location marker, delete it
+        for (let j = 0; j < currMarkers.length-1; j++){
+            if(currMarkers[j].options.title == 'Τοποθεσία') map.removeLayer(currMarkers[j]);}
 
         map.locate({setView: true, watch: true})  
         .on('locationfound', function(e){
