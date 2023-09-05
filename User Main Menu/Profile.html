@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Προφίλ</title>
+    <style>
+        body::before{
+            content: "";
+            background: url("images/supermarket.jpg");
+            opacity: 0.07;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            position: absolute;
+            z-index: -1;  
+        }
+
+        tr{border-bottom: 2px ridge black;}
+
+/* for laptop/pc/tablet */
+        @media only screen and (min-width: 768px){
+
+            th,td{
+            text-align: center;
+            padding: 15px 25px 15px 25px;
+            }
+
+            #chUsername, #chPassword, #showLDHistory, #showOfferHistory{
+            margin-top: 20px;
+            margin-right: 30px;
+            padding: 12px 22px 12px 22px;
+            border-width: 1px;
+            border:none;
+            border-radius: 7px;
+            background-color: darkblue;
+            color: rgb(178, 242, 242);
+            }
+
+            #chUsername{margin-left: 22%;}
+
+            #content, #content2{
+                display: inline-block;
+                max-height: 400px;
+                overflow-y: scroll;
+                align-content: center;
+            }
+
+            #content{
+                margin-top: 4%;
+                margin-left: 30%;}
+
+            #content2{
+                margin-left: 2.5%;}
+            
+            #new_username, #new_password{
+            padding: 5px 10px 5px 10px;
+            margin-left: 45%;
+            margin-top: 5%;
+            font-size: 14px;
+            border-radius: 3px;
+            border-width: 1px;
+            }
+        }   
+            
+
+/* for phone */
+        @media only screen and (max-width: 768px){ 
+
+            th,td{padding: 10px 18px 10px 18px; }
+
+            #user_info_table{
+                display: inline-block;
+                max-width: 360px;
+                overflow-y: scroll;
+            }
+
+            #chUsername, #chPassword, #showLDHistory, #showOfferHistory{
+            margin-top: 20px;
+            margin-right: 30px;
+            padding: 12px 22px 12px 22px;
+            border-width: 1px;
+            border:none;
+            border-radius: 7px;
+            background-color: darkblue;
+            color: rgb(178, 242, 242);
+            }
+
+            #content, #content2{
+                display: inline-block;
+                max-height: 400px;
+                max-width: 300px;
+                overflow-y: scroll;
+                align-content: center;
+                margin-top: 7%;
+            }
+
+            #content{margin-left: 8%;}
+
+            #content2{ margin-left: 3%;} 
+
+            #user_info_table, #user_ldhistory_table, #user_offerhistory_table,
+            #chUsername, #chPassword, #showLDHistory, #showOfferHistory{
+            font-size: 10px;
+            padding: 10px 18px 10px 18px;}
+
+            #chUsername{margin-left: 8%;}
+
+            #showLDHistory{
+                margin-right: 20px;
+                margin-left: 5%;}
+
+            #new_username, #new_password{
+            padding: 5px 10px 5px 10px;
+            margin-left: 22%;
+            margin-top: 5%;
+            font-size: 12px;
+            border-radius: 3px;
+            border-width: 1px;
+            }    
+        }      
+
+
+        #user_info_table, #user_ldhistory_table, #user_offerhistory_table{
+            border-collapse: collapse;
+            background-color: rgb(52, 139, 232, 0.45); 
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 3px;
+        }
+
+        
+        #chUsername:hover, #chPassword:hover, #showLDHistory:hover,
+        #showOfferHistory:hover{
+            cursor: pointer;
+            opacity: 0.85;
+        }
+
+        
+        #new_password{
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        #new_username::placeholder, #new_password::placeholder{
+            font-family:Arial, Helvetica, sans-serif;
+            font-style: italic;
+            padding-left: 3px;
+            opacity: 0.8;}
+
+    </style>
+</head>
+<body>
+    <div id="user_info"></div>
+    <button id="chUsername" onclick="changeusername()">Αλλαγή username</button>
+    <button id="chPassword" onclick="changepassword()">Αλλαγή κωδικού</button>
+    <button id="showLDHistory" onclick="getldhistory()">Ιστορικό likes/dislikes</button>
+    <button id="showOfferHistory" onclick="getofferhistory()">Ιστορικό προσφορών</button>
+    <!-- container for likes/dislikes history -->
+    <div id="content"></div> 
+    <!-- container for offers history -->
+    <div id="content2"></div>
+    <!-- container for new username/password -->
+    <div id="content3"></div>
+
+    <script>
+
+///if username not set or session expired, go back to login page        
+        var username = null; //get current user's username
+        xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                username = this.responseText;
+                if(username == '') window.location.replace("Login.html");
+                else getuserinfo();
+                }
+            };
+        xhttp.open("GET", "LoginForm.php?functionToCall=getUsername", true);
+        xhttp.send(); 
+
+
+///get the current user's info and display it
+        function getuserinfo(){
+
+        xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("user_info").innerHTML = this.responseText;
+                }
+            };
+        xhttp.open("GET", "Profile.php?functionToCall=getUserInfo", true);
+        xhttp.send(); 
+        }
+
+
+///get the current user's likes/dislikes history and display it
+        function getldhistory(){
+
+        if(document.getElementById("showLDHistory").innerHTML == "Ιστορικό likes/dislikes"){  
+            document.getElementById("showLDHistory").innerHTML = "Απόκρυψη ιστορικού";  
+            document.getElementById("showOfferHistory").innerHTML = "Ιστορικό προσφορών"; 
+            xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("content").innerHTML = "";
+                    document.getElementById("content2").innerHTML = "";
+                    document.getElementById("content3").innerHTML = "";
+                    document.getElementById("content").innerHTML = this.responseText;
+                    }
+                };
+            xhttp.open("GET", "Profile.php?functionToCall=getUserLDHistory", true);
+            xhttp.send(); 
+            }
+        else {
+            document.getElementById("content").innerHTML = "";
+            document.getElementById("showLDHistory").innerHTML = "Ιστορικό likes/dislikes"
+        } }   
+
+
+
+///get the current user's offer history and display it
+        function getofferhistory(){
+
+        if(document.getElementById("showOfferHistory").innerHTML == "Ιστορικό προσφορών"){  
+            document.getElementById("showOfferHistory").innerHTML = "Απόκρυψη προσφορών"
+            document.getElementById("showLDHistory").innerHTML = "Ιστορικό likes/dislikes";  
+            xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("content").innerHTML = "";
+                    document.getElementById("content2").innerHTML = "";
+                    document.getElementById("content3").innerHTML = "";
+                    document.getElementById("content2").innerHTML = this.responseText;
+                    }
+                };
+            xhttp.open("GET", "Profile.php?functionToCall=getUserOfferHistory", true);
+            xhttp.send(); 
+            }
+        else {
+            document.getElementById("content2").innerHTML = "";
+            document.getElementById("showOfferHistory").innerHTML = "Ιστορικό προσφορών"
+        } }   
+
+
+///change current user's username and display it
+        function changeusername(){
+
+            document.getElementById("showOfferHistory").innerHTML = "Ιστορικό προσφορών"
+            document.getElementById("showLDHistory").innerHTML = "Ιστορικό likes/dislikes";
+            document.getElementById("content").innerHTML = "";
+            document.getElementById("content2").innerHTML = "";
+            document.getElementById("content3").innerHTML = "";
+            document.getElementById("content3").innerHTML = "<input id=new_username type='text' placeholder='Νέο username'></input>";
+            
+            
+            document.getElementById("new_username").addEventListener("keydown", function(e) {
+
+                if (e.keyCode == 13) { //enter key
+
+                    xhttp = new XMLHttpRequest();
+                    xhttp.onload = function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            if(this.responseText == "Επιτυχής αλλαγή!") 
+                                document.getElementById("user_info_table").rows[1].cells[0].innerHTML = document.getElementById("new_username").value;
+                            alert(this.responseText);
+                            document.getElementById("new_username").value = "";
+                            }
+                        };
+                    xhttp.open("POST", "Profile.php?functionToCall=changeUsername", true);
+                    xhttp.send(document.getElementById("new_username").value); 
+                    
+            }});
+        }   
+
+
+
+///change current user's password and display it
+        function changepassword(){
+
+            document.getElementById("showOfferHistory").innerHTML = "Ιστορικό προσφορών"
+            document.getElementById("showLDHistory").innerHTML = "Ιστορικό likes/dislikes";
+            document.getElementById("content").innerHTML = "";
+            document.getElementById("content2").innerHTML = "";
+            document.getElementById("content3").innerHTML = "";
+            document.getElementById("content3").innerHTML = "<input id=new_password type='password' placeholder='Νέος κωδικός'></input>";
+
+
+            document.getElementById("new_password").addEventListener("keydown", function(e) {
+
+                if (e.keyCode == 13) { //enter key
+
+                    xhttp = new XMLHttpRequest();
+                    xhttp.onload = function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            if(this.responseText == "Επιτυχής αλλαγή!") 
+                                document.getElementById("user_info_table").rows[1].cells[1].innerHTML = document.getElementById("new_password").value;
+                            alert(this.responseText);
+                            document.getElementById("new_password").value = "";
+                            }
+                        };
+                    xhttp.open("POST", "Profile.php?functionToCall=changePassword", true);
+                    xhttp.send(document.getElementById("new_password").value); 
+                    
+            }});
+        }           
+       
+    </script>
+    
+</body>
+</html>
