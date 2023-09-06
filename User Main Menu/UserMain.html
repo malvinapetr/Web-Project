@@ -122,6 +122,7 @@
         //handle selection of an option 
         function changeHandler(e) {
             var currMarkers = getMarkers(map);
+            
             if (e.target.value == "init") {
                 for (let i = 0; i < currMarkers.length; i++){
                     if(currMarkers[i].properties){   //if marker "properties" has been set
@@ -228,7 +229,7 @@
 
                     //if there's already an offer for the same shop, add the category to the existing marker and delete the new marker
                     for (let j = 0; j < currMarkers.length-1; j++){
-                        if(currMarkers[j].options.title == marker.options.title && currMarkers[j].longitude == marker.longitude && currMarkers[j].latitude == marker.latitude){
+                        if(currMarkers[j].options.title == marker.options.title && currMarkers[j]._latlng == marker._latlng){
                             if(currMarkers[j].properties){
                             currMarkers[j].properties.categories.push(marker.properties.categories[0]);
                             map.removeLayer(marker);
