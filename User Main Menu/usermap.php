@@ -5,6 +5,11 @@
 
 
 function pois_with_offers(){
+
+$data = apcu_fetch('pois_with_offers');
+
+if ($data == FALSE) { //if required data not in cache 
+
     try{   
         $host = "localhost";
         $dbname = "ekatanalotis";
@@ -15,11 +20,15 @@ function pois_with_offers(){
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $current_error_mode = $conn->getAttribute(PDO::ATTR_ERRMODE);
          
-       //get the ids, names, and coordinates of the POIs with an active offer, as well as the category of the product with the offer
+        date_default_timezone_set("Europe/Athens"); 
+        $date = date('Y-m-d');
+        //get the ids, names, and coordinates of the POIs with an active offer, as well as the category of the product with the offer
         $sql = "SELECT DISTINCT pois.id,pois.name,latitude,longitude, categories.name FROM pois INNER JOIN offers on pois.id = offers.poi_id
-        INNER JOIN products on products.id = offers.p_id INNER JOIN categories on cid = products.category";
+        INNER JOIN products on products.id = offers.p_id INNER JOIN categories on cid = products.category and offers.exp_date >= '".$date."'"; 
         $pois_info = $conn->query($sql)->fetchAll();
         echo json_encode($pois_info);
+
+        apcu_store('pois_with_offers', $pois_info);
         }
         
       //catch exception
@@ -29,10 +38,17 @@ function pois_with_offers(){
       finally{
         $conn = null;
       }
+    }  
+  else echo json_encode($data);
 }     
 
 
 function pois_without_offers(){
+
+
+$data = apcu_fetch('pois_without_offers');
+
+if ($data == FALSE) { //if required data not in cache 
   try{   
       $host = "localhost";
       $dbname = "ekatanalotis";
@@ -43,11 +59,15 @@ function pois_without_offers(){
       $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       $current_error_mode = $conn->getAttribute(PDO::ATTR_ERRMODE);
        
-     //get the ids, names, and coordinates of the POIs with an active offer
+      date_default_timezone_set("Europe/Athens"); 
+      $date = date('Y-m-d');
+      //get the ids, names, and coordinates of the POIs without an active offer
       $sql = "SELECT DISTINCT pois.id,name,latitude,longitude FROM pois EXCEPT SELECT pois.id,name,latitude,longitude 
-      from pois inner join offers on pois.id = offers.poi_id";
+      from pois inner join offers on pois.id = offers.poi_id and offers.exp_date >= '".$date."'"; 
       $pois_info = $conn->query($sql)->fetchAll();
       echo json_encode($pois_info);
+
+      apcu_store('pois_without_offers', $pois_info);
       }
       
     //catch exception
@@ -56,83 +76,101 @@ function pois_without_offers(){
     }
     finally{
       $conn = null;
-    }
+    }}
+  else echo json_encode($data);
 }   
 
 
 
 function getCategories(){
-  try{   
-      $host = "localhost";
-      $dbname = "ekatanalotis";
-      $con_username = "root";
-      $con_password = "";
 
-      $conn = new PDO("mysql:host=$host;dbname=$dbname",$con_username,$con_password);
-      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $current_error_mode = $conn->getAttribute(PDO::ATTR_ERRMODE);
-       
-     //get all the existing categories
-      $sql = "SELECT name FROM categories";
-      $categories = $conn->query($sql)->fetchAll();
-      echo json_encode($categories);
+$data = apcu_fetch('categories');
+
+if ($data == FALSE) { //if required data not in cache
+    try{   
+        $host = "localhost";
+        $dbname = "ekatanalotis";
+        $con_username = "root";
+        $con_password = "";
+
+        $conn = new PDO("mysql:host=$host;dbname=$dbname",$con_username,$con_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $current_error_mode = $conn->getAttribute(PDO::ATTR_ERRMODE);
+        
+      //get all the existing categories
+        $sql = "SELECT name FROM categories";
+        $categories = $conn->query($sql)->fetchAll();
+        echo json_encode($categories);
+
+        apcu_store('categories', $categories);
+        }
+        
+      //catch exception
+      catch(Exception $e) {
+          echo 'Message: ' .$e->getMessage();
       }
-      
-    //catch exception
-    catch(Exception $e) {
-        echo 'Message: ' .$e->getMessage();
-    }
-    finally{
-      $conn = null;
-    }
+      finally{
+        $conn = null;
+      }}
+  else echo json_encode($data);    
 }     
 
 
 function getSubcategories(){
-  try{   
-      $cat_name = file_get_contents("php://input");
 
-      $con = mysqli_connect('localhost','root','');
-      mysqli_select_db($con,"ekatanalotis");
+  $cat_name = file_get_contents("php://input");
+  $data = apcu_fetch('subcategories-'.$cat_name);
 
-      //get the cid of the chosen category
-      $sql= "SELECT cid FROM categories where name like '".$cat_name."'";
-      $result = mysqli_query($con,$sql);
-      $cid = null; 
+  if ($data == FALSE) { //if required data not in cache
+    try{   
+        
+        $con = mysqli_connect('localhost','root','');
+        mysqli_select_db($con,"ekatanalotis");
 
-      while($row = mysqli_fetch_array($result)) {
-       $cid = $row['cid']; }
-       
-      mysqli_close($con);
+        //get the cid of the chosen category
+        $sql= "SELECT cid FROM categories where name like '".$cat_name."'";
+        $result = mysqli_query($con,$sql);
+        $cid = null; 
 
-      $host = "localhost";
-      $dbname = "ekatanalotis";
-      $con_username = "root";
-      $con_password = "";
+        while($row = mysqli_fetch_array($result)) {
+        $cid = $row['cid']; }
+        
+        mysqli_close($con);
 
-      $conn = new PDO("mysql:host=$host;dbname=$dbname",$con_username,$con_password);
-    
-      //get the subcategories of the chosen category
-      $sql = "SELECT name FROM subcategories where category like '".$cid."'";
-      $subcategories = $conn->query($sql)->fetchAll();
+        $host = "localhost";
+        $dbname = "ekatanalotis";
+        $con_username = "root";
+        $con_password = "";
 
-      echo json_encode($subcategories);
-      }
+        $conn = new PDO("mysql:host=$host;dbname=$dbname",$con_username,$con_password);
       
-    //catch exception
-    catch(Exception $e) {
-        echo 'Message: ' .$e->getMessage();
-    }
-    finally{
-      $conn = null;
-    }
+        //get the subcategories of the chosen category
+        $sql = "SELECT name FROM subcategories where category like '".$cid."'";
+        $subcategories = $conn->query($sql)->fetchAll();
+
+        echo json_encode($subcategories);
+        apcu_store('subcategories-'.$cat_name, $subcategories);
+        }
+        
+      //catch exception
+      catch(Exception $e) {
+          echo 'Message: ' .$e->getMessage();
+      }
+      finally{
+        $conn = null;
+      }}
+  else echo json_encode($data);
+
 }     
 
 
 function getProducts(){
-  try{   
-      $subcat_name = file_get_contents("php://input");
 
+  $subcat_name = file_get_contents("php://input");
+  $data = apcu_fetch('products-'.$subcat_name);
+
+if ($data == FALSE) { //if required data not in cache
+  try{   
       $con = mysqli_connect('localhost','root','');
       mysqli_select_db($con,"ekatanalotis");
 
@@ -157,6 +195,7 @@ function getProducts(){
       $products = $conn->query($sql)->fetchAll();
 
       echo json_encode($products);
+      apcu_store('products-'.$subcat_name, $products);
     }
     //catch exception
     catch(Exception $e) {
@@ -164,46 +203,55 @@ function getProducts(){
     }
     finally{
       $conn = null;
-    }
+    }}
+  else echo json_encode($data);
 }     
 
 
 
 function getAllProducts(){
-  try{   
-      $host = "localhost";
-      $dbname = "ekatanalotis";
-      $con_username = "root";
-      $con_password = "";
+  $data = apcu_fetch('allproducts');
 
-      $conn = new PDO("mysql:host=$host;dbname=$dbname",$con_username,$con_password);
-      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $current_error_mode = $conn->getAttribute(PDO::ATTR_ERRMODE);
-       
-     //get all the existing products
-      $sql = "SELECT name FROM products";
-      $prods = $conn->query($sql)->fetchAll();
-      echo json_encode($prods);
+  if ($data == FALSE) { //if required data not in cache
+    try{   
+        $host = "localhost";
+        $dbname = "ekatanalotis";
+        $con_username = "root";
+        $con_password = "";
+
+        $conn = new PDO("mysql:host=$host;dbname=$dbname",$con_username,$con_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $current_error_mode = $conn->getAttribute(PDO::ATTR_ERRMODE);
+        
+      //get all the existing products
+        $sql = "SELECT name FROM products";
+        $prods = $conn->query($sql)->fetchAll();
+        echo json_encode($prods);
+
+        apcu_store('allproducts', $products);
+        }
+        
+      //catch exception
+      catch(Exception $e) {
+          echo 'Message: ' .$e->getMessage();
       }
-      
-    //catch exception
-    catch(Exception $e) {
-        echo 'Message: ' .$e->getMessage();
-    }
-    finally{
-      $conn = null;
-    }
+      finally{
+        $conn = null;
+      }}
+  else echo json_encode($data);
 }     
 
 
 
 function getOffers(){
   $poi_id = file_get_contents("php://input");
-   
+  date_default_timezone_set("Europe/Athens"); 
+  $date = date('Y-m-d'); 
+
   $con = mysqli_connect('localhost','root','');
   mysqli_select_db($con,"ekatanalotis");
   $sql="SELECT offers.id,products.name,lcount,dcount,price,ful_criteria,sub_date,stock FROM offers INNER JOIN products
-   on offers.poi_id = $poi_id and offers.p_id = products.id"; 
+   on offers.poi_id = $poi_id and offers.p_id = products.id and exp_date >= '".$date."'";  
   $result = mysqli_query($con,$sql);
   
   echo "<table id=info_table>
@@ -271,6 +319,22 @@ function newOffer(){
 
   //if offer is eligible for publication
   if(($count == 0 && $existing_price == -1) || ($count != 0 && $price < ($existing_price - 0.2*$existing_price))){
+
+      //new offer is about to be registered, check which cache entry needs to be deleted 
+      $delete_check = 0;
+      $data = apcu_fetch('pois_with_offers');
+
+      foreach ($data as $poi){
+        if($poi["id"] == $poi_id) {
+          $delete_check++;
+          break;}}
+
+      if($delete_check == 0){  //if the selected POI has no other offers so far
+        apcu_delete('pois_with_offers'); 
+        apcu_delete('pois_without_offers');} 
+      else apcu_delete('pois_with_offers');  //if the selected POI has no at least one other offer
+      
+      //insert the new offer into the database
       $host = "localhost";
       $dbname = "ekatanalotis";
       $con_username = "root";
