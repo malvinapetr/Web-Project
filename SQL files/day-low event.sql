@@ -10,6 +10,7 @@ DO BEGIN
     declare products INT;
     declare i INT;
     declare total_pois INT;
+    declare pois_with_offers INT;
     declare pois_without_offers INT;
     declare nooffer_price DECIMAL(5,2);
     declare offer_price DECIMAL(5,2);
@@ -26,17 +27,16 @@ DO BEGIN
         select p_id into prod_id from lows limit i,1;
         select count(*) into total_pois from pois;
 
-
-        SELECT count(distinct pois.id) into pois_without_offers FROM pois inner join offers 
-        on pois.id = offers.poi_id and offers.p_id = prod_id;
+        SELECT count(distinct pois.id) into pois_with_offers FROM pois inner join offers 
+        on pois.id = offers.poi_id and offers.p_id = prod_id and offers.exp_date >= CURDATE();
         select name into prod_name from products where id = prod_id;
 
         SELECT price into nooffer_price FROM prices where name like prod_name and date like yesterday_date;
-        SELECT sum(price) into offer_price from offers where p_id = prod_id;
+        SELECT sum(price) into offer_price from offers where p_id = prod_id and offers.exp_date >= CURDATE();
 
         SELECT temp_last_week_low into tmp_week_low FROM lows where p_id = prod_id;
 
-        set pois_without_offers = total_pois - pois_without_offers;
+        set pois_without_offers = total_pois - pois_with_offers;
         set nooffer_price = nooffer_price*pois_without_offers;
         set avg_price = round((nooffer_price + offer_price) / total_pois);
 
