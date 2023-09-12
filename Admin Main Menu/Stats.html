@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Στατιστικά</title>
+
+    <style>
+
+        option[default] {
+        display: none;
+        }
+
+        body::before{
+            content: "";
+            background: url("images/supermarket.jpg");
+            opacity: 0.07;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            position: absolute;
+            z-index: -1;  
+        }
+
+        #stats-dropdowns, #dropdownselect {
+            background-color: rgb(52, 139, 232, 0.45); 
+            display: inline-block; 
+            padding: 3px;
+            border-radius: 3px;
+            margin-top: 1%;
+            margin-left: 3%;
+            }
+
+        #dropdownselect {margin-right: 3%;}
+       
+        #stats-dropdowns{margin-right: 8%;}  
+       
+        #stats-container {
+            margin-top: 1%;
+        }
+
+
+    </style>
+
+</head>
+<body>
+    <div id="stats-dropdowns">
+        <label id = "month" for="selectedMonth">Μήνας:</label>
+        <select id="selectedMonth" name="selectedMonth">
+            <!-- Populate with options for months, e.g., <option value="1">Ιανουάριος</option> -->
+            <option value="1">Ιανουάριος</option>
+            <option value="2">Φεβρουάριος</option>
+            <option value="3">Μάρτιος</option>
+            <option value="4">Απρίλιος</option>
+            <option value="5">Μάιος</option>
+            <option value="6">Ιούνιος</option>
+            <option value="7">Ιούλιος</option>
+            <option value="8">Αύγουστος</option>
+            <option value="9">Σεπτέμβριος</option>
+            <option value="10">Οκτώβριος</option>
+            <option value="11">Νοέμβριος</option>
+            <option value="12">Δεκέμβριος</option>
+        
+            <!-- Add more month options as needed -->
+        </select>
+
+        <label id="year" for="selectedYear">Έτος:</label>
+        <select id="selectedYear" name="selectedYear">
+            <!-- Populate with options for years, e.g., <option value="2023">2023</option> -->
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <!-- Add more year options as needed -->
+        </select>
+
+        <button id="submitButton" type="submit" name="submit" onclick="submitForm()">Εμφάνιση Στατιστικών</button>
+        <button id="hideButton" type="submit" name="submit" onclick="hidecharts()">Απόκρυψη</button>   
+</div>  
+<div id="dropdownselect">
+<select id="dropdowncategories" onchange="catselectionHandler(this)"><option value="" default selected>Κατηγορίες</option></select>
+        <button id="dropsubmitButton" type="submit" name="submit" onclick="dropsubmitForm()">Εμφάνιση Στατιστικών</button>
+        <button id="drophideButton" type="submit" name="submit" onclick="hidecharts()">Απόκρυψη</button>  
+</div>
+<div id="stats-container">
+    <canvas id="stats-chart" height="45" width="100"></canvas>
+</div>
+
+
+<script>
+
+///if username not set or session expired, go back to login page        
+    var username = null; //get current user's username
+    xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            username = this.responseText;
+            if(username == '') window.location.replace("Login.html");
+            }
+        };
+    xhttp.open("GET", "LoginForm.php?functionToCall=getUsername", true);
+    xhttp.send();  
+   
+
+/// make the choose-by-date chart    
+    var myChart;
+    // Function to handle the form submission
+    function submitForm() {
+
+        // Get selected values from the dropdowns
+        var selectedMonth = document.getElementById("selectedMonth").value;
+        var selectedYear = document.getElementById("selectedYear").value;
+        var ctx = document.getElementById("stats-chart");
+
+        // Check if a chart already exists on the canvas
+        if (myChart) {
+            myChart.destroy(); // Destroy the existing chart
+        }
+
+        // Calculate the number of days in the selected month and year
+        var daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+        // Create an array for the x-axis labels from 1 to the number of days in the month
+        var labels = [];
+        for (var i = 1; i <= daysInMonth; i++) {
+            labels.push(i);
+        }
+
+        // Send a POST request to your PHP file with the selected values
+        var params = "selectedMonth=" + selectedMonth + "&selectedYear=" + selectedYear;
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("POST", "Statistics.php?functionToCall=numOfOffers", true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+        xmlhttp.onload = function() {
+            if (this.readyState === 4 && this.status === 200) {
+                // Handle the response from the PHP file as needed
+                var data = JSON.parse(this.responseText); // Assuming you receive data as JSON
+                
+                // Initialize an array to hold offer counts for each day, initially all zeros
+                var offers = Array.from({ length: daysInMonth }, () => 0);
+                
+                data.forEach(function (item) {
+                var day = item.day; // Assuming 'day' property in your JSON data
+                var offersCount = item.offers; // Assuming 'offers' property in your JSON data
+                
+                // Set the offer count at the corresponding day position in the array
+                offers[day - 1] = offersCount;
+                });          
+                // Create the graph using Chart.js
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels, // Use the days as the labels (1 to 31)
+                        datasets: [{
+                            label: 'Προσφορές',
+                            data: offers,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Ημερομηνίες'
+                                },
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return value +1 ; // Add 'η' to the day number
+                                    },
+                                    beginAtZero: false
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Πλήθος Προσφορών'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            }
+        };
+
+        // Send the POST request with the selected month and year
+        xmlhttp.send(params);}
+
+
+///make the choose-by-category chart
+    function dropsubmitForm(){
+
+    //if a sepecific value has been chosen (prevents action in case 'Κατηγορίες' is the current value)
+    if(select_value != null && type != null) 
+        {var ctx = document.getElementById("stats-chart");
+
+            // Check if a chart already exists on the canvas
+            if (myChart) {
+                myChart.destroy(); // Destroy the existing chart
+            }
+
+            // Create an array for the x-axis labels from 1 to 100, interval of 10
+            var labels = ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
+            
+            // Send a POST request to your PHP file with the selected values
+            var params = "selectedValue=" + select_value + "&Type=" + type;
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "Statistics.php?functionToCall=averageDiscount", true);
+            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+            xmlhttp.onload = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    
+                    var data = JSON.parse(this.responseText); // Assuming you receive data as JSON
+                    
+                    // Initialize an array to hold discount for each day, initially all null
+                    var disc = Array();
+                    
+                    data.forEach(function (item) {
+                        var discount = item.average_discount; // Assuming 'offers' property in your JSON data
+                        
+                        // Set the average discounts in the array to be displayed
+                        disc.push(discount);
+                    });  
+                    
+                    // Create the graph using Chart.js
+                    myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels, // Use the days as the labels (Δευτέρα to Κυριακή)
+                            datasets: [{
+                                label: 'Εκπτώσεις',
+                                data: disc,
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Ημέρες'
+                                    },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Μέση έκπτωση (%)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                }
+            };
+
+            // Send the POST request with the selected month and year
+            xmlhttp.send(params);
+        }
+    }    
+
+
+///make the categories drop-down list
+
+    var select_value = null;
+    var type = null;
+
+    //fill the selector with the categories
+    var xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var categories = JSON.parse(this.responseText);
+            makeselector_dropcat(categories);
+            
+            }
+        };
+    xhttp.open("GET", "usermap.php?functionToCall=getCategories", true);
+    xhttp.send();
+
+
+    //selector for categories   
+    function makeselector_dropcat(categories){
+        for (let i = 0; i < categories.length; i++){
+            var optionElement = document.createElement("option");
+            optionElement.innerHTML = categories[i].name;
+            optionElement.value =  categories[i].name;
+            document.getElementById("dropdowncategories").appendChild(optionElement);}    
+    }
+
+
+    //handle selection of a category
+    function catselectionHandler(target) {
+        select_value = target.value;
+        type = 'categories';
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "usermap.php?functionToCall=getSubcategories", true);
+        xhttp.setRequestHeader("cat_name", "string");
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {  
+                subcategories = JSON.parse(this.responseText);
+                makeselector_dropsubcat(subcategories,target.value);
+                }
+            };
+        xhttp.send(target.value); 
+    } 
+
+
+    function makeselector_dropsubcat(subcategories, category){
+            
+        var options = document.querySelectorAll('#dropdowncategories option');
+        options.forEach(o => o.remove());
+        document.getElementById("dropdowncategories").innerHTML = "<option value='' default selected>"+category+" - Υποκατηγορίες</option>";    
+            
+
+        var optionElement = document.createElement("option");
+            optionElement.innerHTML = 'Κατηγορίες';
+            optionElement.value =  'Κατηγορίες';
+            document.getElementById("dropdowncategories").appendChild(optionElement);
+
+        for (let i = 0; i < subcategories.length; i++){
+            var optionElement = document.createElement("option");
+            optionElement.innerHTML = subcategories[i].name;
+            optionElement.value =  subcategories[i].name;
+            document.getElementById("dropdowncategories").appendChild(optionElement);}
+
+        //remove category select onchange listener
+        document.getElementById("dropdowncategories").onchange = '';
+        //add new onchange listener 
+        document.getElementById("dropdowncategories").onchange = function(){subcatselectionHandler(this)};
+        }
+
+    //handle selection of a subcategory
+    function subcatselectionHandler(target) {
+        
+        // if selected value == 'Κατηγορίες' go back to categories dropdown
+        if(target.value == 'Κατηγορίες'){
+
+            select_value = null;
+            type = null;
+
+            var options = document.querySelectorAll('#dropdowncategories option');
+            options.forEach(o => o.remove());
+            document.getElementById("dropdowncategories").innerHTML = "<option value='' default selected>Κατηγορίες</option>";
+
+            //remove previous select onchange listener
+            document.getElementById("dropdowncategories").onchange = '';
+            //add new onchange listener 
+            document.getElementById("dropdowncategories").onchange = function(){catselectionHandler(this)};
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var categories = JSON.parse(this.responseText);
+                    makeselector_dropcat(categories);
+                    
+                    }
+                };
+            xhttp.open("GET", "usermap.php?functionToCall=getCategories", true);
+            xhttp.send();
+            }
+        //if any other subcategory is chosen
+        else {
+            select_value = target.value;
+            type = 'subcategories';}
+    } 
+
+    function hidecharts(){
+        if(myChart)
+            myChart.destroy();
+        }
+
+    </script>
+
+</body>
+</html>
