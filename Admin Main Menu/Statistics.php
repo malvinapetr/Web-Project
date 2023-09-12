@@ -61,6 +61,7 @@ function averageDiscount(){
     //get current day
     date_default_timezone_set("Europe/Athens"); 
     $day = date('w'); //gets today's day in the form of an integer (0 for Sunday, 6 for Saturday)
+    $date = date('Y-m-d');
     
     // Ensure you have the month and year parameters in the GET request
     if (isset($_POST['selectedValue']) && isset($_POST['Type'])) {
@@ -88,7 +89,7 @@ function averageDiscount(){
             
             //run it for every day of the current week 
             $data = array();
-            for($i=0; $i<= $day; $i++)
+            for($i=$day; $i>=0; $i--)
             {
             //get the corresponding (average) last week low and offer prices for each offer
             $query = "SELECT sum(last_week_low) as last_week_avg, sum(price) as subcat_avg_price, count(*) as count from offers 
