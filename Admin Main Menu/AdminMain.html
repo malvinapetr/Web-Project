@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>    
     <title>Μενού Διαχειριστή</title>
 
     <style>
@@ -37,18 +37,17 @@
         tr{border-bottom: 2px ridge black;}
 
         
-        #updProd, #delProd, #leaderboard_btn, #updPOIs,
+        #updProd, #delProd, #show_stats_btn,#leaderboard_btn, #updPOIs,
         #delPOIs, #usermenu, #previous, #next, #logout{
-            margin-top: 10px;
-            margin-right: 20px;
-            padding: 12px 22px 12px 22px;
-            border-width: 1px;
-            border:none;
-            border-radius: 7px;
-            background-color: darkblue;
-            color: rgb(178, 242, 242);
-
-        }
+                margin-top: 12px;
+                margin-right: 20px;
+                padding: 10px 20px 10px 20px;
+                border-width: 1px;
+                border:none;
+                border-radius: 7px;
+                background-color: darkblue;
+                color: rgb(178, 242, 242);
+            }
 
         #logout{
             color:white;
@@ -64,7 +63,7 @@
 
         #updProd:hover, #delProd:hover, #leaderboard_btn:hover,
         #updPOIs:hover, #delPOIs:hover, #usermenu:hover, #previous:hover,
-        #next:hover, #logout:hover{
+        #next:hover, #logout:hover, #show_stats_btn:hover{
             cursor: pointer;
             opacity: 0.85;
         }
@@ -87,6 +86,7 @@
 <body>
     <button id="updProd" onclick="insertupdatedata()">Ανέβασμα προϊόντων</button>
     <button id="delProd" onclick="deletedata()">Διαγραφή προϊόντων</button>
+    <button id="show_stats_btn" onclick="gotostats()">Προβολή Στατιστικών</button>
     <button id="leaderboard_btn" onclick="showleader()">Προβολή Leaderboard</button>
     <button id="updPOIs" onclick="insertupdatepois()">Ανέβασμα POIs</button> 
     <button id="delPOIs" onclick="deletepois()">Διαγραφή POIs</button> 
@@ -222,6 +222,10 @@ var username = null; //get current user's username
             xhttp.open("GET", "Logout.php", true);
             xhttp.send();
         }}
+
+
+        function gotostats()
+        {window.location.href = "Stats.html";}
 
     </script>
 
