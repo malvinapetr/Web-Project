@@ -28,11 +28,11 @@ DO BEGIN
         select count(*) into total_pois from pois;
 
         SELECT count(distinct pois.id) into pois_with_offers FROM pois inner join offers 
-        on pois.id = offers.poi_id and offers.p_id = prod_id and offers.exp_date >= CURDATE();
+        on pois.id = offers.poi_id and offers.p_id = prod_id and offers.sub_date <= CURDATE() and offers.exp_date >= CURDATE();
         select name into prod_name from products where id = prod_id;
 
         SELECT price into nooffer_price FROM prices where name like prod_name and date like yesterday_date;
-        SELECT sum(price) into offer_price from offers where p_id = prod_id and offers.exp_date >= CURDATE();
+        SELECT sum(price) into offer_price from offers where p_id = prod_id and offers.sub_date <= CURDATE() and offers.exp_date >= CURDATE();
 
         SELECT temp_last_week_low into tmp_week_low FROM lows where p_id = prod_id;
 
