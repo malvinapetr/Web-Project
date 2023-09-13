@@ -90,17 +90,27 @@
 
 <script>
 
-///if username not set or session expired, go back to login page        
-    var username = null; //get current user's username
-    xhttp = new XMLHttpRequest();
-    xhttp.onload = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            username = this.responseText;
-            if(username == '') window.location.replace("Login.html");
-            }
-        };
-    xhttp.open("GET", "LoginForm.php?functionToCall=getUsername", true);
-    xhttp.send();  
+///if username not set, session expired or user type = user, go back to login page        
+var username = null; //get current user's username
+        xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                username = this.responseText;
+                checkusertype(username);
+            }};
+        xhttp.open("GET", "LoginForm.php?functionToCall=getUsername", true);
+        xhttp.send();  
+
+        function checkusertype(username){
+            xhttp = new XMLHttpRequest();
+            xhttp.onload = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var usertype = this.responseText;
+                    if(username == '' || usertype == 'user') window.location.replace("Login.html");}
+                };
+            xhttp.open("GET", "LoginForm.php?functionToCall=getUserType", true);
+            xhttp.send();  
+        }    
    
 
 /// make the choose-by-date chart    
