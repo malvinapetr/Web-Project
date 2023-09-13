@@ -100,6 +100,12 @@ function getUsername(){
 }
 
 
+//getter function used for getting the user's type in .js files
+function getUserType(){
+  if(isset($_SESSION['user_type'])) echo $_SESSION['user_type'];
+  else echo '';
+}
+
 
 
 
