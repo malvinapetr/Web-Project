@@ -67,16 +67,48 @@ function averageDiscount(){
         $selectedValue = $_POST['selectedValue'];
         $type = $_POST['Type'];
 
-        // Perform your database query to retrieve statistics data
-        //if only category was chosen
+        //if only category was chosen get all the eligible data for that category
         if($type == 'categories'){
+        
+            //get uuid of chosen subcategory 
+            $query = "SELECT cid from categories where name like ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("s", $selectedValue);  
+            $stmt->execute();
+            $result = $stmt->get_result(); 
 
-
-
+            while ($row = mysqli_fetch_assoc($result)) $cid = $row['cid'];
+            
+            //run it for every day of the current week 
+            $data = array();
+            for($i=$day; $i>=0; $i--)
+            {
+            //get the corresponding (average) last week low and offer prices for each offer
+            $query = "SELECT sum(last_week_low) as last_week_avg, sum(price) as cat_avg_price, count(*) as count from offers 
+            inner join lows inner join products on offers.p_id = products.id and products.category like ? 
+            and offers.p_id = lows.p_id and offers.sub_date <= ? and offers.exp_date >= ?";
+                        
+            // Prepare and execute the query (make sure to use the database connection)
+            $date = date('Y-m-d',strtotime("-$i days"));
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("sss", $cid, $date, $date);  
+            $stmt->execute();
+            $result = $stmt->get_result();
+        
+    
+            // Fetch the data and format it as an associative array
+            while ($row = mysqli_fetch_assoc($result)) {
+                if($row['count'] > 0) $avg_discount = 100*($row['last_week_avg'] - $row['cat_avg_price']) / $row['count'];
+                else $avg_discount = 0; 
+                $temp = array();
+                $temp = array('average_discount' => $avg_discount);
+                array_push($data,$temp);
+            }}
 
         }
-        //if subcategory was chosen
+        //if subcategory was chosen get all the eligible data for that subcategory
         else if($type == 'subcategories'){
+
             //get uuid of chosen subcategory 
             $query = "SELECT uuid from subcategories where name like ?";
             $stmt = $conn->prepare($query);
