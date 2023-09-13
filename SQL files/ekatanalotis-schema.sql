@@ -120,11 +120,15 @@ CREATE TABLE lows (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-CREATE TABLE temp (
-  id SMALLINT NOT NULL AUTO_INCREMENT,
-  temp VARCHAR(45),
-  PRIMARY KEY  (id)
+CREATE TABLE total_week_lows (
+  p_id SMALLINT NOT NULL,
+  week_low DECIMAL(5,2) NOT NULL,
+  starting_date DATE NOT NULL,
+  ending_date DATE NOT NULL,
+  PRIMARY KEY  (p_id, starting_date),
+  CONSTRAINT `fk_tw/_product` FOREIGN KEY (p_id) REFERENCES products (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 
 
