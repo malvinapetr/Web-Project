@@ -92,13 +92,13 @@ function averageDiscount(){
             {
             //get the corresponding (average) last week low and offer prices for each offer
             $query = "SELECT sum(last_week_low) as last_week_avg, sum(price) as subcat_avg_price, count(*) as count from offers 
-            inner join lows inner join products 
-            on offers.p_id = products.id and products.subcategory like ? and offers.p_id = lows.p_id and offers.exp_date >= ?";
+            inner join lows inner join products on offers.p_id = products.id and products.subcategory like ? 
+            and offers.p_id = lows.p_id and offers.sub_date <= ? and offers.exp_date >= ?";
                         
             // Prepare and execute the query (make sure to use the database connection)
             $date = date('Y-m-d',strtotime("-$i days"));
             $stmt = $conn->prepare($query);
-            $stmt->bind_param("ss", $uuid, $date);  
+            $stmt->bind_param("sss", $uuid, $date, $date);  
             $stmt->execute();
             $result = $stmt->get_result();
         
