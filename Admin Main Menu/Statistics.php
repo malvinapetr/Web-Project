@@ -61,7 +61,6 @@ function averageDiscount(){
     //get current day
     date_default_timezone_set("Europe/Athens"); 
     $day = date('w'); //gets today's day in the form of an integer (0 for Sunday, 6 for Saturday)
-    $date = date('Y-m-d');
     
     // Ensure you have the month and year parameters in the GET request
     if (isset($_POST['selectedValue']) && isset($_POST['Type'])) {
@@ -97,13 +96,13 @@ function averageDiscount(){
             on offers.p_id = products.id and products.subcategory like ? and offers.p_id = lows.p_id and offers.exp_date >= ?";
                         
             // Prepare and execute the query (make sure to use the database connection)
+            $date = date('Y-m-d',strtotime("-$i days"));
             $stmt = $conn->prepare($query);
             $stmt->bind_param("ss", $uuid, $date);  
             $stmt->execute();
             $result = $stmt->get_result();
         
-            $date = date('Y-m-d',strtotime("-$i days"));
-
+    
             // Fetch the data and format it as an associative array
             while ($row = mysqli_fetch_assoc($result)) {
                 if($row['count'] > 0) $avg_discount = 100*($row['last_week_avg'] - $row['subcat_avg_price']) / $row['count'];
