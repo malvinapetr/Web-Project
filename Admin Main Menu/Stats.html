@@ -12,6 +12,15 @@
         display: none;
         }
 
+        button{background-color: whitesmoke;
+        border: solid 1px black;
+        border-radius: 3px;}
+
+        button:hover{
+            cursor: pointer;
+            background-color: rgba(245,245,245,0.92);
+        }
+
         body::before{
             content: "";
             background: url("images/supermarket.jpg");
@@ -40,6 +49,10 @@
         #stats-container {
             margin-top: 1%;
         }
+
+        #prevButton{
+            font-weight: bold;
+            font-size: 15px;}
 
 
     </style>
@@ -80,8 +93,9 @@
 </div>  
 <div id="dropdownselect">
 <select id="dropdowncategories" onchange="catselectionHandler(this)"><option value="" default selected>Κατηγορίες</option></select>
-        <button id="dropsubmitButton" type="submit" name="submit" onclick="dropsubmitForm()">Εμφάνιση Στατιστικών</button>
-        <button id="drophideButton" type="submit" name="submit" onclick="hidecharts()">Απόκρυψη</button>  
+        <button id="dropsubmitButton" onclick="dropsubmitForm()">Εμφάνιση Στατιστικών</button>
+        <button id="prevButton">&#x2190</button>
+        <button id="drophideButton" onclick="hidecharts()">Απόκρυψη</button>  
 </div>
 <div id="stats-container">
     <canvas id="stats-chart" height="45" width="100"></canvas>
@@ -117,6 +131,10 @@ var username = null; //get current user's username
     var myChart;
     // Function to handle the form submission
     function submitForm() {
+        
+        prev_click_cnt = 0;
+        //remove onclick event listener from 'back' button    
+        document.getElementById("prevButton").onclick = '';
 
         // Get selected values from the dropdowns
         var selectedMonth = document.getElementById("selectedMonth").value;
@@ -203,12 +221,18 @@ var username = null; //get current user's username
         xmlhttp.send(params);}
 
 
-///make the choose-by-category chart
+var prev_click_cnt = 0;
+///make the choose-by-category chart for the current week
     function dropsubmitForm(){
 
     //if a sepecific value has been chosen (prevents action in case 'Κατηγορίες' is the current value)
     if(select_value != null && type != null) 
-        {var ctx = document.getElementById("stats-chart");
+        {  
+            prev_click_cnt = 0;
+            //remove onclick event listener from 'back' button    
+            document.getElementById("prevButton").onclick = '';
+
+            var ctx = document.getElementById("stats-chart");
 
             // Check if a chart already exists on the canvas
             if (myChart) {
@@ -217,6 +241,14 @@ var username = null; //get current user's username
 
             // Create an array for the x-axis labels from 1 to 100, interval of 10
             var labels = ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
+            const d = new Date();
+            let day = d.getDay();
+            var startdate = new Date(d);
+            var enddate = new Date(d);
+            startdate.setDate(startdate.getDate() - day);
+            enddate.setDate(enddate.getDate() + 6 - day);
+            startdate = formatDate(startdate);
+            enddate = formatDate(enddate);
             
             // Send a POST request to your PHP file with the selected values
             var params = "selectedValue=" + select_value + "&Type=" + type;
@@ -257,7 +289,7 @@ var username = null; //get current user's username
                                 x: {
                                     title: {
                                         display: true,
-                                        text: 'Ημέρες'
+                                        text: 'Εβδομάδα ' +startdate+' ως '+enddate
                                     },
                                 },
                                 y: {
@@ -270,7 +302,9 @@ var username = null; //get current user's username
                             }
                         }
                     });
-                    
+
+                //add onclick event listener to 'back' button after the chart of the current week has been created    
+                document.getElementById("prevButton").onclick = function(){previousweek()};
                 }
             };
 
@@ -385,10 +419,113 @@ var username = null; //get current user's username
             type = 'subcategories';}
     } 
 
+
+///make the choose-by-category chart for previous weeks
+function previousweek(){
+    
+        var ctx = document.getElementById("stats-chart");
+
+        //counter that shows how many times the 'back' button has been clicked, aka how many weeks back we need to go
+        prev_click_cnt++;
+
+            // Check if a chart already exists on the canvas
+            if (myChart) {
+                myChart.destroy(); // Destroy the existing chart
+            }
+
+            // Create an array for the x-axis labels from 1 to 100, interval of 10
+            var labels = ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
+            const d = new Date();
+            let day = d.getDay();
+            var startdate = new Date(d);
+            var enddate = new Date(d);
+            startdate.setDate(startdate.getDate() - day - (7*prev_click_cnt));
+            enddate.setDate(enddate.getDate() + 6 - day - (7*prev_click_cnt));
+            startdate = formatDate(startdate);
+            enddate = formatDate(enddate);
+            
+            // Send a POST request to your PHP file with the selected values
+            var params = "selectedValue=" + select_value + "&Type=" + type + "&weeksBack=" + prev_click_cnt;
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "Statistics.php?functionToCall=prevWeeksAverageDiscount", true);
+            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+            xmlhttp.onload = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    
+                    var data = JSON.parse(this.responseText); // Assuming you receive data as JSON
+                    
+                    // Initialize an array to hold discount for each day, initially all null
+                    var disc = Array();
+                    
+                    data.forEach(function (item) {
+                        var discount = item.average_discount; // Assuming 'offers' property in your JSON data
+                        
+                        // Set the average discounts in the array to be displayed
+                        disc.push(discount);
+                    });  
+                    
+                    // Create the graph using Chart.js
+                    myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels, // Use the days as the labels (Δευτέρα to Κυριακή)
+                            datasets: [{
+                                label: 'Εκπτώσεις',
+                                data: disc,
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Εβδομάδα ' +startdate+' ως '+enddate
+                                    },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Μέση έκπτωση (%)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+
+            // Send the POST request with the selected month and year
+            xmlhttp.send(params);
+    }    
+
+
     function hidecharts(){
         if(myChart)
             myChart.destroy();
+        prev_click_cnt = 0;
+        //remove onclick event listener from 'back' button    
+        document.getElementById("prevButton").onclick = '';
         }
+
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+
+        return [year, month, day].join('-');
+    }    
 
     </script>
 
