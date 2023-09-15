@@ -15,6 +15,10 @@
           
           $sql = "DELETE FROM pois";
           $conn->query($sql); 
+
+          //clears POIs from cache in cache of deleting existing file
+          apcu_delete('pois_with_offers');
+          apcu_delete('pois_without_offers'); 
           }
       //catch exception
       catch(Exception $e) {
@@ -27,16 +31,17 @@
 
   
   function insert_update(){
-        try{   
+      if(file_exists("JSON/POIs.geojson"))
+      {  try{   
           $host = "localhost";
           $dbname = "ekatanalotis";
           $con_username = "root";
           $con_password = "";
-  
+
           $conn = new PDO("mysql:host=$host;dbname=$dbname",$con_username,$con_password);
           $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
           $current_error_mode = $conn->getAttribute(PDO::ATTR_ERRMODE);
-           
+            
         //code for updating the 'pois' table 
           $stmt = $conn->prepare("INSERT IGNORE INTO pois(id,name,latitude,longitude) VALUES(?,?,?,?)");
           $json_data = file_get_contents("JSON/POIs.geojson",TRUE);
@@ -64,6 +69,9 @@
             $count++;
             }
           
+          //clears POIs from cache in cache of loading new file
+          apcu_delete('pois_with_offers');
+          apcu_delete('pois_without_offers');  
         }
         //catch exception
         catch(Exception $e) {
@@ -71,5 +79,6 @@
         }
         finally{
           $conn = null;
-        }
+        }}
+      else echo "error";  
     }     
