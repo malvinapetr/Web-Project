@@ -37,7 +37,7 @@ DO BEGIN
         update lows set temp_last_week_low = 50 where p_id = prod_id;
 
         set tmp_week_avg = (sun + mon + tue + wed + thu + fri + sat) / 7;
-        insert into `total_week_lows` (`p_id`, `week_low`, `starting_date`,`ending_date`) VALUES
+        insert into `total_week_averages` (`p_id`, `week_avg`, `starting_date`,`ending_date`) VALUES
         (prod_id, tmp_week_avg,starting_date, end_date);
         
         set i=i+1;
