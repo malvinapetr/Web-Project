@@ -1,0 +1,76 @@
+    body::before{
+        content: "";
+        background: url("../images/supermarket.jpg");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed; 
+        opacity: 0.07;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        position: absolute;
+        z-index: -1;
+    }
+
+    #leaderboard_tbl{
+        margin-top: 4%;
+        margin-left: auto;
+        margin-right: auto;
+        border-collapse: collapse;
+        background-color: rgb(52, 139, 232, 0.45); 
+        border-radius: 3px;
+    }
+
+    th,td{
+        text-align: center;
+        padding: 10px 25px 10px 25px;
+    }
+
+    tr{border-bottom: 2px ridge black;}
+
+    
+    #updProd, #delProd, #show_stats_btn,#leaderboard_btn, #updPOIs,
+    #delPOIs, #usermenu, #previous, #next, #logout{
+            margin-top: 12px;
+            margin-right: 20px;
+            padding: 10px 20px 10px 20px;
+            border-width: 1px;
+            border:none;
+            border-radius: 7px;
+            background-color: darkblue;
+            color: rgb(178, 242, 242);
+        }
+
+    #logout{
+        color:white;
+        background-color: rgb(212, 0, 0);
+        display: inline;
+        margin-left: 27%;
+        margin-top: 35%;
+    }
+
+    #updProd{
+        margin-left: 10px;
+    }
+
+    #updProd:hover, #delProd:hover, #leaderboard_btn:hover,
+    #updPOIs:hover, #delPOIs:hover, #usermenu:hover, #previous:hover,
+    #next:hover, #logout:hover, #show_stats_btn:hover{
+        cursor: pointer;
+        opacity: 0.85;
+    }
+
+    #previous, #next{
+        visibility:hidden;
+        padding: 5px 10px 5px 10px;
+        margin: 5px;
+        margin-top: 10px;
+    }
+
+    #previous{
+        margin-left:47%;     
+    }
+
+
