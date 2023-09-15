@@ -9,10 +9,13 @@
    function getPoiOffers(){
   
         $poi_id = file_get_contents("php://input");
+        date_default_timezone_set("Europe/Athens"); 
+        $date = date('Y-m-d');
+
         $con = mysqli_connect('localhost','root','');
         mysqli_select_db($con,"ekatanalotis");
         $sql="SELECT offers.id,username,products.name,lcount,dcount,price,ful_criteria,sub_date,stock FROM offers INNER JOIN products
-          on offers.poi_id = $poi_id and offers.p_id = products.id"; 
+          on offers.poi_id = $poi_id and offers.p_id = products.id and offers.exp_date >= '".$date."'";
         $result = mysqli_query($con,$sql);
         
         echo "<table id=offers_table>
