@@ -115,7 +115,7 @@ INSERT INTO `lows` (`p_id`, `yesterday_low`,`last_week_low`, `temp_last_week_low
 (870, 1.93, 1.95, 1.93),
 (871, 2.07, 2.05, 2.05);
 
-INSERT INTO `last_week_lows` (`p_id`, `day0`,`day1`, `day2`,`day3`,`day4`,`day5`,`day6`) VALUES
+INSERT INTO `last_week_lows` (`p_id`, `sunday`,`monday`, `tuesday`,`wednesday`,`thursday`,`friday`,`saturday`) VALUES
 (52,1.3,1.2, 1.23, 1.4,1.34,1.22,1.3),
 (189,2.04,1.95, 2.0, 2.03, 2, 1.99, 2),
 (197, 1.7, 1.7,1.65, 1.7,1.7,1.65,1.7),

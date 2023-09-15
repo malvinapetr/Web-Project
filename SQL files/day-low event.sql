@@ -17,10 +17,13 @@ DO BEGIN
     declare tmp_week_low DECIMAL(5,2);
     declare avg_price DECIMAL(5,2);
     declare yesterday_date DATE;
+    declare yesterday_day VARCHAR(45);
     declare prod_name VARCHAR(45);
 
     select count(*) into products from lows;
     SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY) into yesterday_date;
+    SELECT DAYNAME(yesterday_date) into yesterday_day;
+
 
     set i=0;
     while (i < products) do
@@ -46,9 +49,25 @@ DO BEGIN
             update lows set temp_last_week_low = avg_price where lows.p_id = prod_id;
         end if;
 
+        if (yesterday_day like 'Sunday') then
+            update last_week_lows set sunday = avg_price where last_week_lows.p_id = prod_id;
+        elseif (yesterday_day like 'Monday') then
+            update last_week_lows set monday = avg_price where last_week_lows.p_id = prod_id;
+        elseif (yesterday_day like 'Tuesday') then 
+            update last_week_lows set tuesday = avg_price where last_week_lows.p_id = prod_id;
+        elseif (yesterday_day like 'Wednesday') then
+            update last_week_lows set wednesday = avg_price where last_week_lows.p_id = prod_id;
+        elseif (yesterday_day like 'Thursday') then
+            update last_week_lows set thursday = avg_price where last_week_lows.p_id = prod_id;
+        elseif (yesterday_day like 'Friday') then
+            update last_week_lows set friday = avg_price where last_week_lows.p_id = prod_id;
+        elseif (yesterday_day like 'Saturday') then
+            update last_week_lows set saturday = avg_price where last_week_lows.p_id = prod_id;
+        end if;
+        
         set i=i+1;
+
     end while;    
 
-  
 END$$
 DELIMITER ;
