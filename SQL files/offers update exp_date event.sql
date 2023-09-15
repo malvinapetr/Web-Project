@@ -1,8 +1,8 @@
 SET GLOBAL event_scheduler=ON;
 
-DROP EVENT IF EXISTS `delete_offers_check`;
+DROP EVENT IF EXISTS `update_offers_exp_check`;
 DELIMITER $$
-CREATE EVENT `delete_offers_check`
+CREATE EVENT `update_offers_exp_check`
 ON SCHEDULE EVERY 1 DAY STARTS '2023-08-29 00:00:00'
 ON COMPLETION PRESERVE
 DO BEGIN
