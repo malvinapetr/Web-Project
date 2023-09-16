@@ -24,6 +24,10 @@
         body::before{
             content: "";
             background: url("images/supermarket.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-attachment: fixed; 
             opacity: 0.07;
             top: 0;
             left: 0;
@@ -120,7 +124,7 @@ var username = null; //get current user's username
             xhttp.onload = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     var usertype = this.responseText;
-                    if(username == '' || usertype == 'user') window.location.replace("Login.html");}
+                    if(username == '' || usertype == 'user') history.back();}
                 };
             xhttp.open("GET", "LoginForm.php?functionToCall=getUserType", true);
             xhttp.send();  
