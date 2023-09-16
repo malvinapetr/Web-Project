@@ -24,23 +24,23 @@
     <script>
 
 
-///if username not set, session expired or user type = user, go back to login page        
-var username = null; //get current user's username
+///if user not set, session expired or user type not 'admin', go back to login page or the previous page respectively      
         xhttp = new XMLHttpRequest();
         xhttp.onload = function() {
             if (this.readyState == 4 && this.status == 200) {
-                username = this.responseText;
-                checkusertype(username);
+                var username = this.responseText;
+                if(username == '') window.location.href = "Login.html";
+                else checkusertype();
             }};
         xhttp.open("GET", "LoginForm.php?functionToCall=getUsername", true);
         xhttp.send();  
 
-        function checkusertype(username){
+        function checkusertype(){
             xhttp = new XMLHttpRequest();
             xhttp.onload = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     var usertype = this.responseText;
-                    if(username == '' || usertype == 'user') history.back();}
+                    if(usertype != 'admin') history.back();}
                 };
             xhttp.open("GET", "LoginForm.php?functionToCall=getUserType", true);
             xhttp.send();  
