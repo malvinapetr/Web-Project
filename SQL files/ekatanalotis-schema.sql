@@ -15,6 +15,8 @@ CREATE TABLE user (
   PRIMARY KEY  (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE INDEX idx_username
+ON user (username);
 
 CREATE TABLE categories (
   cid VARCHAR(45) NOT NULL,
@@ -22,6 +24,8 @@ CREATE TABLE categories (
   PRIMARY KEY  (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE INDEX idx_categories
+ON categories (cid);
 
 CREATE TABLE subcategories (
   uuid VARCHAR(45) NOT NULL,
@@ -30,6 +34,9 @@ CREATE TABLE subcategories (
   PRIMARY KEY  (uuid),
   CONSTRAINT `fk_sub_category` FOREIGN KEY (category) REFERENCES categories (cid) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE INDEX idx_subcategories
+ON subcategories (uuid);
 
 
 CREATE TABLE products (
@@ -42,6 +49,9 @@ CREATE TABLE products (
   CONSTRAINT `fk_prod_category` FOREIGN KEY (category) REFERENCES categories (cid) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE INDEX idx_products
+ON products (id);
+
 
 CREATE TABLE prices (
   name VARCHAR(45) NOT NULL,
@@ -50,6 +60,9 @@ CREATE TABLE prices (
   PRIMARY KEY  (name, date), 
   CONSTRAINT `fk_prod_name` FOREIGN KEY (name) REFERENCES products (name) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE INDEX idx_prices
+ON prices (name);
 
 
 CREATE TABLE pois (
@@ -60,7 +73,8 @@ CREATE TABLE pois (
   PRIMARY KEY  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
+CREATE INDEX idx_pois
+ON pois (id);
 
 CREATE TABLE offers (
   id SMALLINT NOT NULL AUTO_INCREMENT,
@@ -80,6 +94,8 @@ CREATE TABLE offers (
   CONSTRAINT `fk_offer_poi` FOREIGN KEY (poi_id) REFERENCES pois (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE INDEX idx_offers
+ON offers (p_id, sub_date, exp_date);
 
 CREATE TABLE images (
   id SMALLINT NOT NULL,
@@ -89,6 +105,8 @@ CREATE TABLE images (
   CONSTRAINT `fk_image_prod` FOREIGN KEY (p_id) REFERENCES products (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE INDEX idx_images
+ON images (p_id);
 
 
 CREATE TABLE ldhistory (
@@ -101,6 +119,9 @@ CREATE TABLE ldhistory (
   CONSTRAINT `fk_hist_username` FOREIGN KEY (username) REFERENCES user (username) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_hist_offer` FOREIGN KEY (offer_id) REFERENCES offers (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE INDEX idx_ldhistory
+ON ldhistory (username);
 
 
 CREATE TABLE tokens (
@@ -119,6 +140,9 @@ CREATE TABLE lows (
   CONSTRAINT `fk_product` FOREIGN KEY (p_id) REFERENCES products (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE INDEX idx_lows
+ON lows (p_id);
+
 CREATE TABLE last_week_lows (
   p_id SMALLINT NOT NULL,
   sunday DECIMAL(5,2) NOT NULL,
@@ -132,6 +156,10 @@ CREATE TABLE last_week_lows (
   CONSTRAINT `fk_lwl_product` FOREIGN KEY (p_id) REFERENCES products (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE INDEX idx_lw_lows
+ON last_week_lows (p_id);
+
+
 CREATE TABLE total_week_averages (
   p_id SMALLINT NOT NULL,
   week_avg DECIMAL(5,2) NOT NULL,
@@ -141,6 +169,8 @@ CREATE TABLE total_week_averages (
   CONSTRAINT `fk_twl_product` FOREIGN KEY (p_id) REFERENCES products (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE INDEX idx_tw_averages
+ON total_week_averages (p_id, starting_date, ending_date);
 
 
 
