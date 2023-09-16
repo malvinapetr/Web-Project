@@ -9,6 +9,7 @@
 
     function getUserInfo()  
         {
+
         $con = mysqli_connect('localhost','root','');
         mysqli_select_db($con,"ekatanalotis");
         $sql="SELECT * FROM user WHERE username like '".$_SESSION['username']."'"; 
@@ -18,6 +19,7 @@
         <tr>
         <th>Username</th>
         <th>Κωδικός</th>
+        <th>Email</th>
         <th>Συνολικό σκορ</th>
         <th>Μηνιαίο σκορ</th>
         <th>Συνολικά tokens</th>
@@ -28,6 +30,7 @@
         while($row = mysqli_fetch_array($result)) {
             echo "<td>" . $row['username'] . "</td>";
             echo "<td>" . $row['password'] . "</td>";
+            echo "<td>" . $row['email'] . "</td>";
             echo "<td>" . $row['t_score'] ."</td>";
             echo "<td>" . $row['m_score'] ."</td>";
             echo "<td>" . $row['t_tokens'] ."</td>";
@@ -125,7 +128,7 @@
       mysqli_close($con);    
       
       if($count == 0){
-
+        
         $host = "localhost";
         $dbname = "ekatanalotis";
         $con_username = "root";
@@ -155,6 +158,7 @@
         || !preg_match('/[@_!.,#$%^&*()<>?|}{~:]/',$new_password))  $check=0;
         
       if($check == 1){
+        
         $host = "localhost";
         $dbname = "ekatanalotis";
         $con_username = "root";
