@@ -6,6 +6,7 @@ USE ekatanalotis;
 CREATE TABLE user (
   username VARCHAR(45) NOT NULL,
   password VARCHAR(45) NOT NULL,
+  email VARCHAR(45) NOT NULL,
   type ENUM('admin','user') NOT NULL,
   t_score INT UNSIGNED DEFAULT 0,
   m_score SMALLINT UNSIGNED DEFAULT 0,

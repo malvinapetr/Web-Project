@@ -1,16 +1,16 @@
-INSERT INTO `user` (`username`, `password`, `type`, `t_score`, `m_score`, `t_tokens`, `m_tokens`,`signup_date`) VALUES
-('MrAdmin', '$$Adm1n$$', 'admin', 400,32,600,103,'2021-11-30'),
-('MrsUser', '##Us3r##', 'user', 200,5,100,25,'2022-02-02'),
-('Random1', '$$Asm1n$$', 'user', 300,6,200,10,'2021-11-30'),
-('Νίκος Δημητρίου', '$$Adn1n$$', 'user', 350,5,230,3,'2022-12-17'),
-('Βασιλική Λαζαρίδη', '$$Arm1n$$', 'admin', 200,7,100,90,'2022-12-28'),
-('Γιώργος Δημόπουλος', '$$Odm1n$$', 'user', 100,8,400,34,'2022-09-12'),
-('Γιάννης Παπακώστας', '$$Bdm1n$$', 'user', 150,54,302,103,'2023-08-21'),
-('Χριστίνα Πέτρου', '$$Adm4n$$', 'user', 40,16,40,10,'2023-03-17'),
-('Μαρία Γιαννοπούλου', '$$Adm1n#$', 'user', 320,2,450,35,'2023-04-25'),
-('Μάρκος Γεωργίου', '$$Ad2an$$', 'user', 130,3,32,23,'2023-06-28'),
-('Ελένη Αναγνωστάκη', '$$Adm1n2$', 'user', 100,1,45,16,'2023-07-05'),
-('Κώστας Χρήστου', '$$A3m1n$$', 'user', 0,0,0,0,'2023-03-30');
+INSERT INTO `user` (`username`, `password`,`email`, `type`, `t_score`, `m_score`, `t_tokens`, `m_tokens`,`signup_date`) VALUES
+('MrAdmin', '$$Adm1n$$','mradmin@email.gr','admin', 400,32,600,103,'2021-11-30'),
+('MrsUser', '##Us3r##','mrsuser@email.gr', 'user', 200,5,100,25,'2022-02-02'),
+('Random1', '$$Asm1n$$', 'random1@email.gr', 'user', 300,6,200,10,'2021-11-30'),
+('Νίκος Δημητρίου', '$$Adn1n$$', 'n.dimitriou@email.gr','user', 350,5,230,3,'2022-12-17'),
+('Βασιλική Λαζαρίδη', '$$Arm1n$$', 'lazar@email.gr', 'admin', 200,7,100,90,'2022-12-28'),
+('Γιώργος Δημόπουλος', '$$Odm1n$$', 'giwrgos.d@email.gr',  'user', 100,8,400,34,'2022-09-12'),
+('Γιάννης Παπακώστας', '$$Bdm1n$$', 'gpap1999@email.gr',  'user', 150,54,302,103,'2023-08-21'),
+('Χριστίνα Πέτρου', '$$Adm4n$$', 'christinapetrou@email.gr', 'user', 40,16,40,10,'2023-03-17'),
+('Μαρία Γιαννοπούλου', '$$Adm1n#$', 'giannakop32@email.gr', 'user', 320,2,450,35,'2023-04-25'),
+('Μάρκος Γεωργίου', '$$Ad2an$$', 'markgeo@email.gr', 'user', 130,3,32,23,'2023-06-28'),
+('Ελένη Αναγνωστάκη', '$$Adm1n2$', 'elenianagnost@email.gr', 'user', 100,1,45,16,'2023-07-05'),
+('Κώστας Χρήστου', '$$A3m1n$$','k.xristou0@email.gr',  'user', 0,0,0,0,'2023-03-30');
 
 
 INSERT INTO `offers` (`id`, `username`, `p_id`,`lcount`,`dcount`,`price`,`ful_criteria`,`sub_date`,`poi_id`,`stock`,`exp_date`) VALUES
