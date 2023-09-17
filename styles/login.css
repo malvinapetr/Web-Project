@@ -9,7 +9,7 @@ body {
  
  
 /*username/password text-field */
-#username, #password{
+#username, #password, #email{
     font-size: 90%;
     padding-left: 6px;
     padding-top: 4px;
@@ -26,7 +26,7 @@ body {
     max-width: 35%;
     min-width: 250px;
     margin: 0 auto;
-    margin-top: 17%; 
+    margin-top: 12%; 
     align-items: center;
 }
 
@@ -44,7 +44,7 @@ body {
 }
 
 /*text over the username/password text-fields*/
-label[for="username"], label[for="password"] {
+label[for="username"], label[for="password"], label[for="email"] {
     -webkit-text-stroke: 1px darkblue;
     font-family: Arial;
     font-weight:bold;
@@ -78,7 +78,8 @@ color: darkblue;;
  
 /*text-field placeholders*/
 #username::placeholder, 
-#password::placeholder{
+#password::placeholder,
+#email::placeholder{
     opacity: 0.8;
     font-style: italic;
 }
