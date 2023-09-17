@@ -19,7 +19,7 @@ $password = str_replace(' ','', $password);
 
 $check = 0;
 
-if(!$username || !$password) echo "Κανένα πεδίο δεν μπορεί να είναι κενό!";          //if username or password is blank
+if(!$username || !$password) echo "Username και κωδικός δεν μπορούν να είναι κενά!";          //if username or password is blank
 else $check = checkPassword($password);   //check that the password has correct format before accessing the database
 
 
@@ -55,21 +55,37 @@ if($check){          //if password has correct format then start accessing the d
         }
         else if ($con_type == "signup") {                              //case = sign-up
         
-        if(mysqli_num_rows($result) == 0){          // if no other user with the same username create user
-            $sql = "INSERT INTO user (username, password, type,t_score,m_score,t_tokens,m_tokens,signup_date)
-            VALUES (?,?,?,?,?,?,?,?)";
-            $stmt = mysqli_stmt_init($conn);
-            mysqli_stmt_prepare($stmt,$sql);
-            $user_type = "user";
-            $zero = 0;
-            $date = date("Y-m-d");
-            mysqli_stmt_bind_param($stmt,"sssiiiis",$username,$password,$user_type,$zero,$zero,$zero,$zero,$date);
-            mysqli_stmt_execute($stmt);
+        $email = trim($user_info['email']);
+        $email = str_replace(' ','', $email);
 
-            $_SESSION['username'] = $username;
-            echo "Επιτυχία";
-        }
-        else  echo "Υπάρχει ήδη χρήστης με αυτό το username!";
+        $check2 = 0;
+        if(!$email) echo "Δεν δόθηκε email!";          //if username or password is blank
+        else $check2 = checkEmail($email);   //check that the password has correct format before accessing the database
+
+
+        if($check2)  //if email has correct format then start accessing the database
+        {  if(mysqli_num_rows($result) == 0){          // if no other user with the same username check the email
+
+            $sql = "SELECT * FROM user WHERE email = '$email'";
+            $result = $conn->query($sql);
+
+                if(mysqli_num_rows($result) == 0)    //if no other user has the same email the sign-up is successful
+                  {$sql = "INSERT INTO user (username, password,email, type,t_score,m_score,t_tokens,m_tokens,signup_date)
+                  VALUES (?,?,?,?,?,?,?,?,?)";
+                  $stmt = mysqli_stmt_init($conn);
+                  mysqli_stmt_prepare($stmt,$sql);
+                  $user_type = "user";
+                  $zero = 0;
+                  $date = date("Y-m-d");
+                  mysqli_stmt_bind_param($stmt,"ssssiiiis",$username,$password,$email,$user_type,$zero,$zero,$zero,$zero,$date);
+                  mysqli_stmt_execute($stmt);
+
+                  $_SESSION['username'] = $username;
+                  $_SESSION['user_type'] = 'user';
+                  echo "Επιτυχία";}
+                else  echo "Υπάρχει ήδη χρήστης με αυτό το email!";
+            }
+          else  echo "Υπάρχει ήδη χρήστης με αυτό το username!";}
     
         }
     }
@@ -92,6 +108,14 @@ function checkPassword($password){
 return 1;    
 }
 
+//check email format
+function checkEmail($email){
+  if(!preg_match('/^[a-zA-Z0-9\_.]+@email.gr/',$email)) {
+      echo "Δεν δόθηκε έγκυρο email!";
+      return 0;
+  }
+return 1;    
+}
 
 //getter function used for getting the user's username in .js files
 function getUsername(){
