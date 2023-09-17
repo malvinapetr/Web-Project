@@ -3,7 +3,7 @@ SET GLOBAL event_scheduler=ON;
 DROP EVENT IF EXISTS `distribute_monthly_tokens`;
 DELIMITER $$
 CREATE EVENT `distribute_monthly_tokens`
-ON SCHEDULE EVERY 1 MONTH STARTS '2023-08-31 23:59:00'
+ON SCHEDULE EVERY 1 MONTH STARTS '2023-09-30 23:59:00'
 ON COMPLETION PRESERVE
 DO BEGIN
     declare new_tokens int;
