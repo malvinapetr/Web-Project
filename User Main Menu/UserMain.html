@@ -39,44 +39,25 @@
 ///create the basic map components       
         var map = L.map('map');
 
-        const mediaQuery = window.matchMedia('(max-width: 900px)');
+        
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '© OpenStreetMap'
             }).addTo(map);
 
-        var currMarkers = getMarkers(map);    
-        
-        if(!mediaQuery.matches){     //standard location point for when geolocation doesn't work/is inaccurate, aka when using laptop/pc 
-            
-        //if there's already a user location marker, delete it
-        for (let j = 0; j < currMarkers.length-1; j++){
-            if(currMarkers[j].options.title == 'Τοποθεσία') map.removeLayer(currMarkers[j]);}
-
-        map.setView([38.2315,21.7396], 14);
-            var marker = L.marker([38.2315,21.7396],{title: "Τοποθεσία"}).bindPopup('Τοποθεσία χρήστη').addTo(map);
-            marker._icon.classList.add("self_huechange");
-        }
-        else{         //else use geolocation to find user's location, aka when using ipad/phone
-
-        //if there's already a user location marker, delete it
-        for (let j = 0; j < currMarkers.length-1; j++){
-            if(currMarkers[j].options.title == 'Τοποθεσία') map.removeLayer(currMarkers[j]);}
 
         map.locate({setView: true, watch: true})  
         .on('locationfound', function(e){
             map.setView([e.latitude, e.longitude], 14);
             var marker = L.marker([e.latitude, e.longitude],{title: "Τοποθεσία"}).bindPopup('Τοποθεσία χρήστη').addTo(map);
             marker._icon.classList.add("self_huechange");
-            
+            makemap();  // creates the map, initially showing only POIs with active offer
         })
         .on('locationerror', function(e){
                 console.log(e);
-                alert("Location access denied.");
+                alert("Άρνηση πρόσβασης");
             });
-        }    
 
-        makemap();  // creates the map, initially showing only POIs with active offer
 
 ///create the search-by-category dropdown on the map
         var selector = L.control({
