@@ -10,6 +10,7 @@ function checkLogin()
 $user_info = json_decode(file_get_contents("php://input"), true);
 $username = trim($user_info['username']);
 $password = trim($user_info['password']);
+$password = str_replace(' ','', $password);
 $con_type = $user_info['type'];
 
 
@@ -52,8 +53,10 @@ if($check){          //if password has correct format then start accessing the d
         else if ($con_type == "signup") {                              //case = sign-up
         
         $email = trim($user_info['email']);
+        $email = str_replace(' ','', $email);
 
         $check2 = 0;
+        
         if(!$email) echo "Δεν δόθηκε email!";          //if username or password is blank
         else $check2 = checkEmail($email);   //check that the password has correct format before accessing the database
 
