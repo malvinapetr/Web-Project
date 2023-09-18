@@ -13,10 +13,6 @@ $password = trim($user_info['password']);
 $con_type = $user_info['type'];
 
 
-//remove potential space from inside the inputs
-$username = str_replace(' ','', $username);
-$password = str_replace(' ','', $password);
-
 $check = 0;
 
 if(!$username || !$password) echo "Username και κωδικός δεν μπορούν να είναι κενά!";          //if username or password is blank
@@ -56,7 +52,6 @@ if($check){          //if password has correct format then start accessing the d
         else if ($con_type == "signup") {                              //case = sign-up
         
         $email = trim($user_info['email']);
-        $email = str_replace(' ','', $email);
 
         $check2 = 0;
         if(!$email) echo "Δεν δόθηκε email!";          //if username or password is blank
