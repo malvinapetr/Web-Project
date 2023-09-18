@@ -16,7 +16,7 @@
           $sql = "DELETE FROM pois";
           $conn->query($sql); 
 
-          //clears POIs from cache in cache of deleting existing file
+          //clears POIs from cache in case of deleting existing file
           apcu_delete('pois_with_offers');
           apcu_delete('pois_without_offers'); 
           }
@@ -69,7 +69,7 @@
             $count++;
             }
           
-          //clears POIs from cache in cache of loading new file
+          //clears POIs from cache in case of loading new file
           apcu_delete('pois_with_offers');
           apcu_delete('pois_without_offers');  
         }
