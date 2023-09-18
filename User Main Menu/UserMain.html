@@ -35,6 +35,19 @@
             };
         xhttp.open("GET", "LoginForm.php?functionToCall=getUsername", true);
         xhttp.send();  
+
+
+///get user type (used to determine whether to display offer delete feature)      
+var user_type = null; //get current user's username
+        xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                user_type = this.responseText;
+                }
+            };
+        xhttp.open("GET", "LoginForm.php?functionToCall=getUserType", true);
+        xhttp.send();  
+
         
 ///create the basic map components       
         var map = L.map('map');
@@ -245,30 +258,54 @@
             xhttp.onload = function() {
                 if (this.readyState == 4 && this.status == 200) {  
                     info = this.responseText;  
-                                  
-                    if(getDistance(marker._latlng) <= 50){ //if distance of the POI and the user's location is <= 50 meters
-                        marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo>"+info+
-                            "</div><button id=review_btn>Αξιολόγηση προσφοράς</button><button id=addreview_btn>Προσθήκη προσφοράς</button>", 
-                            {maxWidth : "auto"}).openPopup();
+                              
+                        if(getDistance(marker._latlng) <= 50){ //if distance of the POI and the user's location is <= 50 meters
+                            marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo>"+info+
+                                "</div><button id=review_btn>Αξιολόγηση προσφοράς</button><button id=addreview_btn>Προσθήκη προσφοράς</button>", 
+                                {maxWidth : "auto"}).openPopup();
 
-                        document.getElementById("review_btn").onclick = function () { //on button click send info and redirect
-                            sessionStorage.setItem("poi_id", marker.id);
-                            location.href = 'Review.html';
-                        };
+                            document.getElementById("review_btn").onclick = function () { //on button click send info and redirect
+                                sessionStorage.setItem("poi_id", marker.id);
+                                location.href = 'Review.html';
+                            };
 
-                      document.getElementById("addreview_btn").onclick = function () { //on button click send info and redirect
-                      marker.closePopup();
-                      dropdowncategories(marker);};
-                    }
-                    else    //if distance of the POI and the user's location is > 50 meters
-                        marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo>"+info+"</div>", {
-                        maxWidth : "auto"}).openPopup(); 
-                    }
+                        document.getElementById("addreview_btn").onclick = function () { //on button click send info and redirect
+                        marker.closePopup();
+                        dropdowncategories(marker);};
+                        }
+                        else    //if distance of the POI and the user's location is > 50 meters
+                            marker.bindPopup("<h4><center>"+ marker.options.title + "</h4><div id=prodInfo>"+info+"</div>", {
+                            maxWidth : "auto"}).openPopup(); 
+                        
+                        if(user_type == 'admin'){ //if user is an admin, add delete listeners to the created icons
+                            delelements = document.querySelectorAll('.fa.fa-trash');
+
+                            for (var i = 0; i < delelements.length; i++) {
+                                delelements[i].onclick = deletehandler;
+                        }   
+
+                        }
+                        }
                 };
             
             xhttp.send(marker.id);  
         }
 
+        //handle pressing the delete offer button
+        function deletehandler(e){
+            if(confirm("Θέλετε σίγουρα να διαγράψετε την προσφορά;")){
+            var row = e.target.closest("tr"); //get closest ancestor <tr> element of the clicked element, aka the selected row
+            offer_id = row.firstChild.innerHTML; //get the respective offer id
+               
+            xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "Review.php?functionToCall=deleteOffer", true);
+                xhttp.setRequestHeader("offer_info", "string");
+                xhttp.onload = function(){
+                    alert("Διαγράφηκε!");
+                }
+                xhttp.send(offer_id);       
+        }  
+        }
 
         function noofferspopuphandler(e){
             var marker = e.target;

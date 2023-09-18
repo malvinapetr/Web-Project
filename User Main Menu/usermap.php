@@ -1,4 +1,5 @@
 <?php
+    session_start();
     if (isset($_GET['functionToCall']) && function_exists($_GET['functionToCall'])) {
         call_user_func($_GET['functionToCall']);
       }
@@ -9,7 +10,6 @@ function pois_with_offers(){
 $data = apcu_fetch('pois_with_offers');
 
 if ($data == FALSE) { //if required data not in cache 
-
     try{   
         $host = "localhost";
         $dbname = "ekatanalotis";
@@ -26,11 +26,10 @@ if ($data == FALSE) { //if required data not in cache
         $sql = "SELECT DISTINCT pois.id,pois.name,latitude,longitude, categories.name FROM pois INNER JOIN offers on pois.id = offers.poi_id
         INNER JOIN products on products.id = offers.p_id INNER JOIN categories on cid = products.category and offers.exp_date >= '".$date."'"; 
         $pois_info = $conn->query($sql)->fetchAll();
+        
         echo json_encode($pois_info);
-
         apcu_store('pois_with_offers', $pois_info);
         }
-        
       //catch exception
       catch(Exception $e) {
           echo 'Message: ' .$e->getMessage();
@@ -278,6 +277,7 @@ function getOffers(){
 
     echo "<td>" . $row['sub_date'] . "</td>";
     echo "<td>" . $row['stock'] . "</td>";
+    if($_SESSION['user_type'] == 'admin') echo "<td class=delete><i class='fa fa-trash'></i></td>";
     echo "</tr>";
    }
   echo "</table>";

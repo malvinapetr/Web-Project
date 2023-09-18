@@ -76,7 +76,7 @@
           else if($row['stock'] == 'ναι'){
             echo "<td class=thumbdown><i class='fa fa-thumbs-down' style='font-size:110%;'></i></td>";
             echo "<td class=thumbup><i class='fa fa-thumbs-up' style='font-size:110%;'></i></td>";}
-          if($_SESSION['user_type'] == 'admin') echo "<td class=delete><i class='fa fa-trash'></i></td>";  
+          if($_SESSION['user_type'] == 'admin') echo "<td class=delete><i class='fa fa-trash style='font-size:110%;'></i></td>";  
         }
         echo "</tr>";
         
@@ -214,7 +214,9 @@
     mysqli_select_db($con,"ekatanalotis");
     $sql = "DELETE FROM offers WHERE id='".$offer_id."' ";
     mysqli_query($con, $sql); 
-    
+
+    //clears POIs with offers from cache
+    apcu_delete('pois_with_offers');
   }
       
 
