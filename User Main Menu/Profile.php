@@ -152,6 +152,8 @@
     function changePassword(){
 
       $new_password = file_get_contents("php://input");
+      $new_password = trim($new_password);
+      $new_password = str_replace(' ','', $new_password);
 
       $check = 1;
       if(strlen($new_password) < 8 || !preg_match('/[A-Z]/', $new_password) || !preg_match('/[0-9]/', $new_password) 
