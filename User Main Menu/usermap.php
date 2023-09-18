@@ -332,7 +332,7 @@ function newOffer(){
       if($delete_check == 0){  //if the selected POI has no other offers so far
         apcu_delete('pois_with_offers'); 
         apcu_delete('pois_without_offers');} 
-      else apcu_delete('pois_with_offers');  //if the selected POI has no at least one other offer
+      else apcu_delete('pois_with_offers');  //if the selected POI has at least one other offer
       
       //insert the new offer into the database
       $host = "localhost";
