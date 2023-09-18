@@ -150,7 +150,7 @@
                     xhttp.onload = function() {
                         if (this.readyState == 4 && this.status == 200) {
                             if(this.responseText == "Επιτυχής αλλαγή!") 
-                                document.getElementById("user_info_table").rows[1].cells[1].innerHTML = document.getElementById("new_password").value;
+                                document.getElementById("user_info_table").rows[1].cells[1].innerHTML = document.getElementById("new_password").value.replace(/\s/g, '');
                             alert(this.responseText);
                             document.getElementById("new_password").value = "";
                             }
