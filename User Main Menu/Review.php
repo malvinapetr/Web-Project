@@ -215,8 +215,9 @@
     $sql = "DELETE FROM offers WHERE id='".$offer_id."' ";
     mysqli_query($con, $sql); 
 
-    //clears POIs with offers from cache
+    //clears POIs from cache
     apcu_delete('pois_with_offers');
+    apcu_delete('pois_without_offers');
   }
       
 
