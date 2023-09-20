@@ -128,7 +128,7 @@ function averageDiscountCalculator($day,$selectedValue,$type,$offset){
         //get the corresponding (average) last week low and offer prices for each offer
         $query = "SELECT sum(week_avg) as last_week_avg, sum(price) as cat_avg_price, count(*) as count from offers 
         inner join total_week_averages inner join products on offers.p_id = products.id and products.category like ? 
-        and offers.p_id = total_week_averages.p_id and offers.sub_date <= ? and offers.exp_date >= ? and starting_date >= ? and ending_date <= ?";
+        and offers.p_id = total_week_averages.p_id and offers.sub_date <= ? and offers.exp_date > ? and starting_date >= ? and ending_date <= ?";
    
         //shift determines how many days back we'll start iterating from
         if($offset > 0) $shift = 7*$offset + date('w') - (6 - $i);
@@ -181,7 +181,7 @@ function averageDiscountCalculator($day,$selectedValue,$type,$offset){
         //get the corresponding (average) last week low and offer prices for each offer
         $query = "SELECT sum(week_avg) as last_week_avg, sum(price) as subcat_avg_price, count(*) as count from offers 
         inner join total_week_averages inner join products on offers.p_id = products.id and products.subcategory like ? 
-        and offers.p_id = total_week_averages.p_id and offers.sub_date <= ? and offers.exp_date >= ? and starting_date >= ? and ending_date <= ?";
+        and offers.p_id = total_week_averages.p_id and offers.sub_date <= ? and offers.exp_date > ? and starting_date >= ? and ending_date <= ?";
                     
         //shift determines how many days back we'll start iterating from
         if($offset > 0) $shift = 7*$offset + date('w') - (6 - $i);
