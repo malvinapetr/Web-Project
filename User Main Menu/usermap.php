@@ -227,7 +227,7 @@ function getAllProducts(){
         $prods = $conn->query($sql)->fetchAll();
         echo json_encode($prods);
 
-        apcu_store('allproducts', $products);
+        apcu_store('allproducts', $prods);
         }
         
       //catch exception
@@ -305,8 +305,11 @@ function newOffer(){
   while($row = mysqli_fetch_array($result)) {
     $pid = $row['id']; }
 
-  //check if the same offer (same product and same POI) already exists
-  $sql= "SELECT * FROM offers where p_id = $pid and poi_id = $poi_id";
+  date_default_timezone_set("Europe/Athens"); 
+  $date = date('Y-m-d');   
+
+  //check if the same active offer (same product and same POI) already exists
+  $sql= "SELECT * FROM offers where p_id = $pid and poi_id = $poi_id and exp_date >= '".$date."'";
   $result = mysqli_query($con,$sql);
 
   $count = 0; 
