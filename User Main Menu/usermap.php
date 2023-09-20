@@ -24,7 +24,7 @@ if ($data == FALSE) { //if required data not in cache
         $date = date('Y-m-d');
         //get the ids, names, and coordinates of the POIs with an active offer, as well as the category of the product with the offer
         $sql = "SELECT DISTINCT pois.id,pois.name,latitude,longitude, categories.name FROM pois INNER JOIN offers on pois.id = offers.poi_id
-        INNER JOIN products on products.id = offers.p_id INNER JOIN categories on cid = products.category and offers.exp_date >= '".$date."'"; 
+        INNER JOIN products on products.id = offers.p_id INNER JOIN categories on cid = products.category and offers.exp_date > '".$date."'"; 
         $pois_info = $conn->query($sql)->fetchAll();
         
         echo json_encode($pois_info);
@@ -62,7 +62,7 @@ if ($data == FALSE) { //if required data not in cache
       $date = date('Y-m-d');
       //get the ids, names, and coordinates of the POIs without an active offer
       $sql = "SELECT DISTINCT pois.id,name,latitude,longitude FROM pois EXCEPT SELECT pois.id,name,latitude,longitude 
-      from pois inner join offers on pois.id = offers.poi_id and offers.exp_date >= '".$date."'"; 
+      from pois inner join offers on pois.id = offers.poi_id and offers.exp_date > '".$date."'"; 
       $pois_info = $conn->query($sql)->fetchAll();
       echo json_encode($pois_info);
 
@@ -250,7 +250,7 @@ function getOffers(){
   $con = mysqli_connect('localhost','root','');
   mysqli_select_db($con,"ekatanalotis");
   $sql="SELECT offers.id,products.name,lcount,dcount,price,ful_criteria,sub_date,stock FROM offers INNER JOIN products
-   on offers.poi_id = $poi_id and offers.p_id = products.id and exp_date >= '".$date."'";  
+   on offers.poi_id = $poi_id and offers.p_id = products.id and exp_date > '".$date."'";  
   $result = mysqli_query($con,$sql);
   
   echo "<table id=info_table>
@@ -309,7 +309,7 @@ function newOffer(){
   $date = date('Y-m-d');   
 
   //check if the same active offer (same product and same POI) already exists
-  $sql= "SELECT * FROM offers where p_id = $pid and poi_id = $poi_id and exp_date >= '".$date."'";
+  $sql= "SELECT * FROM offers where p_id = $pid and poi_id = $poi_id and exp_date > '".$date."'";
   $result = mysqli_query($con,$sql);
 
   $count = 0; 
