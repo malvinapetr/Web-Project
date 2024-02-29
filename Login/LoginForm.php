@@ -57,8 +57,8 @@ if($check){          //if password has correct format then start accessing the d
 
         $check2 = 0;
         
-        if(!$email) echo "Δεν δόθηκε email!";          //if username or password is blank
-        else $check2 = checkEmail($email);   //check that the password has correct format before accessing the database
+        if(!$email) echo "Δεν δόθηκε email!";          //if email is blank
+        else $check2 = checkEmail($email);   //check that the email has correct format before accessing the database
 
 
         if($check2)  //if email has correct format then start accessing the database
