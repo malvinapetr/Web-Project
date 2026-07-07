@@ -1,5 +1,5 @@
 # Web-Project
-Making a web application with data from e-katanalotis
+Full-stack web application using real-world consumer data from e-katanalotis.
 
 **Notes**:
 
